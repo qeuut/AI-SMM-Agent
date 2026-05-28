@@ -1,18 +1,8 @@
-from AI_SMM_AGENT.app.models.callbacks import CallbacksStyle
-import re
-
+STYLE_PREFIXES = ("tone_", "emoji_", "length_", "hashtags_", "cta_", "formality_", "addressing_")
 
 class CallbackFilters:
     @staticmethod
     def is_style(data: str) -> bool:
-        # 1. Если строка пустая или в ней нет знака "_", сразу бракуем
-        if not data or "_" not in data:
+        if not data:
             return False
-
-        # 2. Проверяем служебные исключения
-        is_forbidden = data.startswith(("cat_", "cat__")) or data.endswith(("_custom", "_back"))
-
-        # 3. Пропускаем только если это не запрещено
-        return not is_forbidden
-
-
+        return data.startswith(STYLE_PREFIXES) and not data.endswith(("_custom", "_back"))

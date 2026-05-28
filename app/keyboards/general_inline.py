@@ -48,7 +48,7 @@ def publication_main():
                           )
 
 def schedule_post():
-    return create_buttons(texts=["⬅️ Вернуться назад"], callbacks=["show_post"]
+    return create_buttons(texts=["⬅️ Вернуться назад"], callbacks=["publication"]
                           )
 
 

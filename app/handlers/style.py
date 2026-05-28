@@ -56,11 +56,13 @@ async def style_brand(callback: CallbackQuery) -> None:
     style_text = ""
 
     for key, value in CATEGORY_LABELS.items():
-        if key in style and key in STYLE_TRANSLATIONS:
-            translated = STYLE_TRANSLATIONS[key].get(style[key], style[key])
+        if key in style:
+            if key in STYLE_TRANSLATIONS:
+                translated = STYLE_TRANSLATIONS[key].get(style[key], style[key])
+            else:
+                translated = style[key]  # для brand_character, banned — показываем как есть
             style_text += f"{value}: {translated}\n"
         else:
-            # ИСПРАВЛЕНО: Добавлен тег курсива <i> для "Не указано"
             style_text += f"{value}: <i>Не указано</i>\n"
 
     base_text = texts_for_messages["cat"]
@@ -110,7 +112,8 @@ async def processing_style(callback: CallbackQuery, state: FSMContext) -> None:
 
 @style_router.callback_query(F.data.endswith(CallbacksStyle.CUSTOM_PREFIX))
 async def processing_custom_styles(callback: CallbackQuery, state: FSMContext) -> None:
-    style, _ = callback.data.split("_", 1) # 1 потому что нужно обрабатывать callback data по типу таких "brand_character_custom" [brand]= callback.data.split("_", 1)
+    style, _ = callback.data.rsplit("_", 1) # 1 для обработки callback data по типу таких "brand_character_custom" с 2 "_" и больше
+    logger.info(f"which_style = {style}")
     await state.update_data(which_style=style) # было - which_style=callback.data
     await callback.message.edit_text("Напишите здесь свой параметр под этот стиль.",
                                   reply_markup=create_buttons(texts=["⬅️ Вернуться назад"],
@@ -122,9 +125,10 @@ async def processing_custom_styles(callback: CallbackQuery, state: FSMContext) -
 async def save_custom_style(message: Message, state: FSMContext):
     data = await state.get_data()
     style_name = data.get("which_style")
-
+    logger.info(f"saving style_name = {style_name}, value = {message.text}")
     await set_style(user_id=message.from_user.id, key=style_name, value=message.text)
-    await message.answer("Стиль успешно сохранен.", reply_markup=back_to())
+    await message.answer("Стиль успешно сохранен.", reply_markup=back_to(text="⬅️ Вернуться назад",
+                                                                              callback_data="style_brand"))
 
     await state.set_state(None) # -------------------------------------------------------------------------------- КОСТЫЛЬ ИСПРАВИТЬ
     return
