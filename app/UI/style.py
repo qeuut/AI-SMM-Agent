@@ -36,4 +36,7 @@ def get_buttons_and_text(group_buttons: str, value: str = "-") -> tuple[InlineKe
     buttons = creating_style_buttons(group_buttons=group_buttons, current_value=value)
     text = texts_for_messages.get(group_buttons, "Ошибка...")
 
+    logger.debug(f"Функция ---get_buttons_and_text--- group_buttons = {group_buttons} | value = {value}")
+    logger.debug(f"Функция ---get_buttons_and_text--- text = {text}")
+
     return buttons, text

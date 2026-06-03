@@ -9,7 +9,8 @@ LOG_DIR.mkdir(exist_ok=True)
 
 def setup_logger() -> logging.Logger:
     logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG) # минимально разрешенный уровень logger.debug для logs
+    logging.getLogger("aiosqlite").setLevel(logging.INFO) # для библиотеки aiosqlite устанавливаем уровень не меньше чем INFO чтобы не засорять консоль
 
     formatter = colorlog.ColoredFormatter(
         "%(log_color)s%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -33,5 +34,5 @@ def setup_logger() -> logging.Logger:
 
     return logger
 
-# Вызываем функцию настройки и получаем готовый logger, который будем импортировать в других файлах
+# Вызываем функцию настройки и получаем logger, который будем импортировать в других файлах
 logger = setup_logger()

@@ -29,14 +29,15 @@ from AI_SMM_AGENT.app.services.data_models import DraftPost, MediaType
 from AI_SMM_AGENT.app.utils.states import CreatedPost
 from AI_SMM_AGENT.app.models.n8n_exceptions import N8NError
 from AI_SMM_AGENT.app.models.callbacks import CallbacksPost
-from AI_SMM_AGENT.app.models.post import SessionModes
+from AI_SMM_AGENT.app.models.sessions_modes import SessionModes
 
 # Сервисы и Репозитории
 from AI_SMM_AGENT.app.services.draft import draft_working
 from AI_SMM_AGENT.app.services.saved_style import get_style
 from AI_SMM_AGENT.app.services.n8n_client import n8n_request
 from AI_SMM_AGENT.app.services.post_service import sort_answer_n8n, get_telegram_file_url, publish_to_channel
-from AI_SMM_AGENT.app.repositories.post_repo import db_created_post, get_or_create_session
+from AI_SMM_AGENT.app.repositories.post_repo import db_created_post
+from AI_SMM_AGENT.app.repositories.sessionID_repo import get_or_create_session
 
 # Middleware и Фильтры
 from AI_SMM_AGENT.app.middlewares.albums_filters import AlbumMiddleware
@@ -72,14 +73,19 @@ def _get_photos_from_draft(draft: DraftPost, draft_dict: dict) -> list[dict]:
 @posts_router.callback_query(F.data == CallbacksPost.CREATE_POST)
 async def cmd_create_post(callback: CallbackQuery, state: FSMContext, bot: Bot) -> None:
     text = (
-        "<b>✍️ Создание нового поста</b>\n\n"
-        "Пожалуйста, пришлите исходные материалы. Это может быть:\n"
-        "• Текстовое описание или набросок мысли\n"
-        "• Ссылка на пост-пример, стиль которого нужно повторить\n"
-        "• Фотография, видео или голосовое сообщение\n\n"
-        "Вы можете отправить всё одним сообщением или по очереди, "
-        "а я подготовлю готовый контент."
+        "<b>Создание публикации</b>\n\n"
+        "Отправьте в чат исходные материалы для генерации. Система автоматически распознает формат и подготовит текст.\n\n"
+        "<b>Поддерживаемые форматы:</b>\n"
+        "» <b>Текст:</b> тезисы, сырые наброски или готовая тема\n"
+        "» <b>Ссылки:</b> YouTube, Shorts, Reels, TikTok или посты из Telegram\n"
+        "» <b>Аудио:</b> голосовые сообщения и файлы (транскрибация)\n"
+        "» <b>Медиа:</b> изображения или видеоролики с описанием в подписи\n\n"
+        "<b>Примеры запросов:</b>\n"
+        "- <i>«Напиши экспертный пост про тренды SEO на основе этих тезисов...»</i>\n"
+        "- <code>https://youtube.com...</code>\n\n"
+        "<i>Пришлите файл, ссылку или текст для начала генерации...</i>"
     )
+
     await cleanup_media_messages(bot=bot, chat_id=callback.message.chat.id, state=state)
     await callback.message.edit_text(text=text, reply_markup=back_to(), parse_mode="HTML")
     await get_or_create_session(user_id=callback.from_user.id, mode=SessionModes.SET_SESSION_ID)
@@ -320,7 +326,7 @@ async def cmd_publishing_post(callback: CallbackQuery, state: FSMContext):
         text=generated_text,
         draft_object=data.get("draft_post")
     )
-    await callback.message.answer(text="<b>Пост был успешно опубликован</b>", reply_markup=manage_current_post(), parse_mode="HTML")
+    await callback.message.edit_text(text="<b>Пост был успешно опубликован</b>", reply_markup=manage_current_post(), parse_mode="HTML")
 
 
 @posts_router.callback_query(F.data == CallbacksPost.EDIT_CURRENT_POST)

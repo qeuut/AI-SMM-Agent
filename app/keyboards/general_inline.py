@@ -5,6 +5,9 @@ from aiogram.types import InlineKeyboardMarkup
 # функция для кнопок
 from AI_SMM_AGENT.app.keyboards import create_buttons
 
+# models - CallbackStyle
+from AI_SMM_AGENT.app.models.callbacks import CallbacksStyle
+
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +24,8 @@ def main_menu():
                                      "statistics",
                                      "style_brand",
                                      "content_plan",
-                                     "settings"]
+                                     "settings"],
+                          net=[1,2,2,1]
                           )
 
 
@@ -45,10 +49,6 @@ def pre_procedural_actions():
 def publication_main():
     return create_buttons(texts=["📤 Очередь на публикацию", "📅 Запланировать новый", "✅ Опубликованные", "⬅️ Вернутся в главное меню"],
                           callbacks=["queue_publication", "schedule_post", "published_posts", "MainMenu"]
-                          )
-
-def schedule_post():
-    return create_buttons(texts=["⬅️ Вернуться назад"], callbacks=["publication"]
                           )
 
 
@@ -109,5 +109,38 @@ def cancel_or_back():
                           callbacks=["-", "MainMenu"]) # доделать отмену публикации (с предварительным вопросом перед отменой)
 
 def create_post_or_back():
-    return create_buttons(texts=["🆕 Создать новый пост", "⬅️ Вернуться назад"],
+    return create_buttons(texts=["🆕 Создать новый пост", "⬅️ Вернуться в меню публикаций"],
                           callbacks=["create_post", "publication"])
+
+
+def style_menu():
+    logger.debug(f"func ---style_menu--- values: CallbacksStyle.CAT__TONE{CallbacksStyle.CAT__TONE.value} CallbacksStyle.CAT__EMOJI{CallbacksStyle.CAT__EMOJI.value} CallbacksStyle.CAT_BACK{CallbacksStyle.CAT_BACK}")
+    return create_buttons(
+        texts=[
+            "🎭 Стилистика и тон",      # 2 кнопки в ряд
+            "✨ Использование эмодзи",
+            "📏 Объем публикаций",      # 2 кнопки в ряд
+            "#️⃣ Настройка хештегов",
+            "🎯 Призывы к действию (CTA)", # 2 кнопки в ряд
+            "👔 Уровень формальности",
+            "🧬 Характер бренда",       # 2 кнопки в ряд
+            "🗣 Обращение к аудитории",
+            "🚫 Стоп-слова и ограничения", # 1 кнопка на всю ширину
+            "✏️ Свой текстовый промт",   # 1 кнопка на всю ширину
+            "⬅️ Вернуться в главное меню" # 1 кнопка на всю ширину
+        ],
+        callbacks=[
+            CallbacksStyle.CAT__TONE.value,
+            CallbacksStyle.CAT__EMOJI.value,
+            CallbacksStyle.CAT__LENGTH.value,
+            CallbacksStyle.CAT__HASHTAGS.value,
+            CallbacksStyle.CAT__CTA.value,
+            CallbacksStyle.CAT__FORMALITY.value,
+            CallbacksStyle.CAT__BRAND_CHARACTER.value,
+            CallbacksStyle.CAT__ADDRESSING.value,
+            CallbacksStyle.CAT__BANNED.value,
+            CallbacksStyle.CAT__CUSTOM.value,
+            CallbacksStyle.CAT_BACK.value
+        ],
+        net=[2, 2, 2, 2, 1, 1, 1]  # Компактная профессиональная сетка
+    )

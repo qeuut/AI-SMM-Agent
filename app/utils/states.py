@@ -9,6 +9,9 @@ class SchedulePost(StatesGroup):
     WaitScheduleTime = State()
 
 
+class SelectChannel(StatesGroup):
+    WaitChannelInput = State()
+
 class CreatedPost(StatesGroup):
 
     WaitMessForPost = State()

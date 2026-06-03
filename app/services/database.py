@@ -57,11 +57,11 @@ async def init_db() -> None: # открываем асинхронное сое�
     await db.execute('''
                     CREATE TABLE IF NOT EXISTS user_info (
                         user_id INTEGER PRIMARY KEY,
-                        session_id INTEGER
+                        session_id INTEGER,
+                        channel_id INTEGER
                     )
                 ''')
 
 
     await db.commit()
     await db.execute('''CREATE INDEX IF NOT EXISTS idx_posts_user_status ON posts(user_id, status);''')
-

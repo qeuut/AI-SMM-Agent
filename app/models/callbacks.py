@@ -63,6 +63,13 @@ class CallbacksNavigation(str, Enum):
 
 class CallbacksPost(str, Enum):
     CREATE_POST = "create_post"
+
+    CREATE_POST_VIA_LINK = "create_post_via_link"
+    CREATE_POST_VIA_TEXT = "create_post_via_text"
+    CREATE_POST_VIA_VOICE = "create_post_via_voice"
+    CREATE_POST_VIA_MEDIA = "create_post_via_media"
+
+
     GENERATE_POST = "generate_post"
     QUESTION_FOR_POST = "question_for_post"
     PUBLISHING_POST = "publishing_post"
@@ -90,6 +97,10 @@ class CallbacksSettings(str, Enum):
 
 class CallbacksStatistic(str, Enum):
     STATISTICS = "statistics"
+
+    STATISTICS_OF_THIRTY_DAYS = "statistic_of_thirty_days"
+    STATISTICS_OF_SPECIFIC_POST = "statistics_of_specific_post"
+    STATISTICS_AI_RECOMMENDATION= "statistics_AI_recommendation"
 
 
 class CallbacksStyle(str, Enum):

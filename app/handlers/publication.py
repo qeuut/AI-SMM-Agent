@@ -11,8 +11,8 @@ from aiogram.filters import StateFilter
 
 # Клавиатуры
 from AI_SMM_AGENT.app.keyboards.general_inline import (
-    publication_main, schedule_post, manage_current_post,
-    y_or_n, cancel_or_back, create_post_or_back
+    publication_main, manage_current_post, y_or_n,
+    cancel_or_back, create_post_or_back,
 )
 from AI_SMM_AGENT.app.keyboards import back_to
 
@@ -61,7 +61,7 @@ async def cmd_schedule_post(callback: CallbackQuery, state: FSMContext, bot: Bot
         await callback.message.edit_text(
             "Напишите удобное время для публикации.\n\n"
             "Например: <i>завтра в 15:00</i>, <i>в среду вечером</i>, <i>25 июня в 18:30</i>",
-            reply_markup=schedule_post(),
+            reply_markup=back_to(text="⬅️ Вернуться в меню публикаций", callback_data="publication"),
             parse_mode="HTML"
         )
         await state.set_state(SchedulePost.WaitScheduleTime)
@@ -167,8 +167,9 @@ async def queue_posts(callback: CallbackQuery, state: FSMContext) -> None:
 
     if not rows:
         logger.error("Функция ---queue_posts--- rows - пуст")
-        await callback.message.edit_text(text="📋 Очередь пуста — нет запланированных постов.",
-                                         reply_markup=back_to(text="⬅️ Вернуться назад",callback_data="publication"))
+        await callback.message.edit_text(text="📋 Очередь пуста - нет запланированных постов.",
+                                         reply_markup=back_to(text="⬅️ Вернуться в меню публикаций",
+                                                              callback_data="publication"))
         return None
 
     result = ""
@@ -192,5 +193,5 @@ async def check_published_posts(callback: CallbackQuery):
     logger.info(f"Пользователь {callback.from_user.id} открыл историю опубликованных постов")
     await callback.message.edit_text(
         "DEBUG: тут можно будет посмотреть опубликованные посты (список со статистикой)",
-        reply_markup=schedule_post()
+        reply_markup=back_to(text="⬅️ Вернуться в меню публикаций", callback_data="publication")
     )
