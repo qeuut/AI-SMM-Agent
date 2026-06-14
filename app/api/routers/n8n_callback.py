@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from aiogram import Bot
 
-from app.services.post_service import sort_answer_n8n
+from AI_SMM_AGENT.app.services.post_service import sort_answer_n8n
 
 
 router = APIRouter(prefix="/n8n", tags=["n8n"])

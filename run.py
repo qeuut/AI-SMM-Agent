@@ -1,5 +1,5 @@
 import asyncio
-from app.bot import main
+from AI_SMM_AGENT.app.bot import main
 
 if __name__ == "__main__":
     asyncio.run(main())
