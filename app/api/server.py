@@ -1,3 +1,8 @@
+import sys
+import app as AI_SMM_AGENT
+sys.modules["AI_SMM_AGENT"] = AI_SMM_AGENT
+
+
 from fastapi import FastAPI
 import uvicorn
 
