@@ -429,19 +429,19 @@ async def answer_on_question_about_post(message: Message, state: FSMContext):
     logger.info(f"N8N response: {response}")
     result = sort_answer_n8n(response)
 
-    if result.status == N8NStatus.SUCCESS:
-        markup = pre_procedural_actions()
-    elif result.status == N8NStatus.REJECTION:
-        markup = clarifying_question()
-    elif result.status == N8NStatus.QUESTION:
-        markup = skip_question_or_back()
-    else:
-        markup = back_to()
+    # if result.status == N8NStatus.SUCCESS:
+    #     markup = pre_procedural_actions()
+    # elif result.status == N8NStatus.REJECTION:         - т.к это не конечный ответ (соответственно кнопки не нужны)
+    #     markup = clarifying_question()
+    # elif result.status == N8NStatus.QUESTION:
+    #     markup = skip_question_or_back()
+    # else:
+    #     markup = back_to()
 
     await message.bot.edit_message_text(
         chat_id=message.chat.id,
         message_id=bot_mssg_id,
         text=result.final_text,
-        reply_markup=markup,
+        # reply_markup=markup,- т.к это не конечный ответ (соответственно кнопки не нужны)
         parse_mode="HTML"
     )
