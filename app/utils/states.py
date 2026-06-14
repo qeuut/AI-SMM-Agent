@@ -1,5 +1,4 @@
 from aiogram.fsm.state import StatesGroup, State
-from mypyc.ir.ops import SetAttr
 
 
 class GeneralState(StatesGroup):
