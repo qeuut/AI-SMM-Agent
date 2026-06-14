@@ -4,7 +4,8 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.redis import RedisStorage
 from redis.asyncio import Redis
 
-from AI_SMM_AGENT.app.api.server import run_api_server
+# from AI_SMM_AGENT.app.api.server import run_api_server
+from app.api.server import run_api_server # для railway
 from AI_SMM_AGENT.app.config.settings import settings
 from AI_SMM_AGENT.app.handlers import main_router as main_router
 from AI_SMM_AGENT.app.middlewares.admin_only import AdminOnlyMiddleware
