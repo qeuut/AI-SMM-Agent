@@ -3,7 +3,7 @@ import re
 import logging
 
 # с проекта
-from AI_SMM_AGENT.app.models.n8n import N8NStatus, N8NResult
+from app.models.n8n import N8NStatus, N8NResult
 from aiogram.types import InputMediaPhoto
 
 
