@@ -44,10 +44,7 @@ async def settings_cmd(event: CallbackQuery | Message) -> None:
 
         "В этом разделе можно:\n"
         "<b>></b> выбрать Telegram-канал для публикации\n"
-        "<b>></b> настроить режим генерации и постинга\n"
         "<b>></b> ознакомиться с информацией о проекте\n\n"
-
-        "Выберите нужный раздел ниже."
     )
 
     if isinstance(event, CallbackQuery):
@@ -84,11 +81,11 @@ async def calling_setting_cmd_by_reply(message: Message, state: FSMContext):
     await state.update_data(reply_keyboard_status=False)
 
 
-@settings_router.callback_query(F.data == CallbacksSettings.PUBLICATION_MODE_SETTINGS)
-async def cmd_publication_mode_settings(callback: CallbackQuery) -> None:
-    await callback.message.edit_text(text="DEBUG: <b>🤖 Режим публикации</b>",
-                                     reply_markup=settings_select_publication_mode(),
-                                     parse_mode="HTML")
+# @settings_router.callback_query(F.data == CallbacksSettings.PUBLICATION_MODE_SETTINGS)
+# async def cmd_publication_mode_settings(callback: CallbackQuery) -> None:
+#     await callback.message.edit_text(text="<b>🤖 Режим публикации</b>",
+#                                      reply_markup=settings_select_publication_mode(),
+#                                      parse_mode="HTML")
 
 
 @settings_router.callback_query(F.data == CallbacksSettings.SELECT_CHANNEL_SETTINGS)
@@ -99,7 +96,7 @@ async def cmd_select_channel_settings(callback: CallbackQuery, state: FSMContext
         logger.error(f"Функция ---cmd_select_channel_settings--- ошибка во время удаления сообщения с ID {callback.message.message_id}")
 
 
-    sent = await callback.message.answer(text="DEBUG: <b>📢 Выбор канала</b>\n\n"
+    sent = await callback.message.answer(text="<b>📢 Выбор канала</b>\n\n"
                                               "В меню ниже: после нажатия на кнопку выберете нужный вам канал",
                                          reply_markup=get_change_channel_reply_keyboard(),
                                          parse_mode="HTML")
@@ -150,24 +147,22 @@ async def handle_shared_chat(message: Message, state: FSMContext):
 @settings_router.callback_query(F.data == CallbacksSettings.HELP_SETTINGS)
 async def cmd_help_settings(callback: CallbackQuery) -> None:
     text = (
-        "<b>ℹ️ О боте / Помощь</b>\n\n\n"
+        "<b>ℹ️ О боте</b>\n\n"
 
-        "<b>Your AI SMM Agent</b> — AI-система для работы с Telegram-контентом.\n\n"
+        "<b>Your AI SMM Agent</b> — AI-система для профессиональной работы с Telegram-контентом.\n\n"
 
-        "Бот анализирует <b>тренды</b>, <b>конкурентов</b> и материалы из открытых источников, "
-        "помогает находить идеи для контента, создавать <b>контент-планы</b> "
-        "и писать посты для <b>Telegram-каналов</b>.\n\n"
+        "Бот принимает ваши голосовые сообщения, наброски и медиафайлы, "
+        "помогает находить идеи, создавать пошаговые <b>контент-планы</b> "
+        "и писать готовые посты под <b>стиль вашего канала</b>.\n\n"
 
         "<blockquote>Система объединяет несколько AI-моделей в единую рабочую цепочку.</blockquote>\n\n"
 
-        "Одни модели занимаются поиском и анализом информации, "
-        "другие выстраивают структуру и логику контента, "
-        "отдельные модули отвечают за качество текста, "
-        "подачу и вовлечение аудитории.\n\n"
+        "Вместо базовых шаблонов здесь работает сеть <b>AI-агентов</b>: "
+        "одни модули извлекают главные смыслы из ваших материалов, "
+        "другие выстраивают четкую логику, а отдельные нейросети "
+        "отвечают за качество текста и вовлечение аудитории.\n\n"
 
-        "В отличие от обычных AI-ботов, система работает не как один чат, "
-        "а как набор <b>AI-агентов</b>, где каждый выполняет отдельную функцию "
-        "и участвует в формировании итогового результата.\n\n"
+        "В результате вы получаете не просто автогенерацию, а глубоко проработанный SMM-контент.\n\n"
 
         "⚙️ <i>Проект находится в активной разработке.</i>\n"
         "Функции системы, сценарии работы и качество генерации "

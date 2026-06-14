@@ -164,7 +164,7 @@ async def catch_all(message: Message, state: FSMContext, album: Optional[list[Me
 ]))
 async def send_request_for_post(callback: CallbackQuery, state: FSMContext) -> Message | None:
     is_retry = callback.data == CallbacksPost.RETRY_REQUEST_TO_N8N
-    message = await callback.message.edit_text("✨ Повторяю запрос..." if is_retry else "✨ Генерация...")
+    message = await callback.message.edit_text("⏳ Повторяю запрос..." if is_retry else "⏳ Отправляю запрос...") # ✨
 
     data = await state.get_data()
     draft_dict = data.get("draft_post")

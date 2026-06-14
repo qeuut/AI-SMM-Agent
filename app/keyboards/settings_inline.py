@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 def settings_main_btn():
     return create_buttons(
-        texts=["🤖 Генерация и постинг", "📢 Telegram-канал", "ℹ️ О боте / Помощь", "⬅️ Вернуться в главное меню"],
-        callbacks=["publication_mode_settings", "select_channel_settings", "help_settings", "MainMenu"]
+        texts=["📢 Telegram-канал", "ℹ️ О боте / Помощь", "⬅️ Вернуться в главное меню"],
+        callbacks=["select_channel_settings", "help_settings", "MainMenu"]
     )
 
 

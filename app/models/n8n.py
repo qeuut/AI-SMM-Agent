@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 
 class N8NStatus(Enum):
+    CONNECTED = "connected"
     SUCCESS = "success"
     REJECTION = "rejection"
     QUESTION = "question"

@@ -33,11 +33,11 @@ async def db_update_session_id(user_id: int) -> bool | str:
 
 
 async def db_get_session_id(user_id: int) -> bool | str:
-    async with await get_db() as db:
-        cursor = await db.execute("""
-                        SELECT session_id FROM user_info WHERE user_id = ?""", (user_id,))
+    db = await get_db()
+    cursor = await db.execute("""
+                    SELECT session_id FROM user_info WHERE user_id = ?""", (user_id,))
 
-        row = await cursor.fetchone()
+    row = await cursor.fetchone()
 
     if not row:
         logger.warning(f"Функция ---get_session_id--- user_id = {user_id} не найдено")

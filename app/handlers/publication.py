@@ -14,7 +14,7 @@ from AI_SMM_AGENT.app.keyboards.general_inline import (
     publication_main, manage_current_post, y_or_n,
     cancel_or_back, create_post_or_back,
 )
-from AI_SMM_AGENT.app.keyboards import back_to
+from AI_SMM_AGENT.app.keyboards import back_to, create_buttons
 
 # Репозитории
 from AI_SMM_AGENT.app.repositories.post_repo import db_created_post
@@ -42,13 +42,25 @@ async def publication(callback: CallbackQuery) -> None:
         "Здесь вы можете отслеживать статус ваших постов, планировать "
         "выход нового контента на будущее или просматривать историю "
         "уже опубликованных записей.\n\n"
-        "Выберите нужное действие ниже:"
     )
     await callback.message.edit_text(text=text, reply_markup=publication_main(), parse_mode="HTML")
 
 
 @publication_router.callback_query(F.data == CallbacksPublication.SCHEDULED_POST)
 async def cmd_schedule_post(callback: CallbackQuery, state: FSMContext, bot: Bot):
+    text_no_active_post = (
+        "<b>📅 Планирование публикаций</b>\n\n"
+
+        "В системе пока нет активного черновика для отправки.\n\n"
+
+        "<b>Как запланировать пост по таймеру:</b>\n"
+        "» Нажмите на кнопку <b>✨ Создать пост</b> ниже и отправьте материалы;\n"
+        "» Дождитесь создания готового текста системой;\n"
+        "» Нажмите кнопку «Запланировать» под результатом и напишите время.\n\n"
+
+        "<i>Создайте свой первый материал прямо сейчас, чтобы поставить его в контент-очередь.</i>"
+    )
+
     logger.info(f"Пользователь {callback.from_user.id} нажал 'Запланировать'")
     data = await state.get_data()
     generated_text = data.get("generated_text")
@@ -69,8 +81,9 @@ async def cmd_schedule_post(callback: CallbackQuery, state: FSMContext, bot: Bot
     else:
         logger.warning(f"Пользователь {callback.from_user.id} — активный пост не найден в FSM")
         await callback.message.edit_text(
-            "Нет активного поста для планирования.\n\nСначала создайте и сгенерируйте пост.",
-            reply_markup=create_post_or_back()
+            text=text_no_active_post,
+            reply_markup=create_post_or_back(),
+            parse_mode="HTML"
         )
 
 
@@ -154,6 +167,17 @@ async def set_fsm_for_y_answer(callback: CallbackQuery, state: FSMContext):
 
 @publication_router.callback_query(F.data == CallbacksPublication.QUEUE_PUBLICATION)
 async def queue_posts(callback: CallbackQuery, state: FSMContext) -> None:
+    text_queue_is_none = (
+        "<b>📋 Очередь публикаций</b>\n\n"
+    
+        "В вашем контент-плане пока нет запланированных постов.\n\n"
+    
+        "<blockquote>Все созданные вами публикации, которые ожидают отправки по таймеру, "
+        "будут отображаться в этом разделе в виде удобного списка с датой и временем.</blockquote>\n\n"
+    
+        "<i>Хотите заполнить очередь контентом? Начните генерацию нового материала прямо сейчас.</i>"
+    )
+
     logger.info(f"Пользователь {callback.from_user.id} открыл очередь публикаций")
 
     db = await get_db()
@@ -167,9 +191,11 @@ async def queue_posts(callback: CallbackQuery, state: FSMContext) -> None:
 
     if not rows:
         logger.error("Функция ---queue_posts--- rows - пуст")
-        await callback.message.edit_text(text="📋 Очередь пуста - нет запланированных постов.",
-                                         reply_markup=back_to(text="⬅️ Вернуться в меню публикаций",
-                                                              callback_data="publication"))
+        await callback.message.edit_text(text=text_queue_is_none,
+                                         reply_markup=create_buttons(texts=["✨ Создать пост",
+                                                                            "⬅️ Вернуться в меню публикаций"],
+                                                                     callbacks=["create_post", "publication"]),
+                                         parse_mode="HTML")
         return None
 
     result = ""

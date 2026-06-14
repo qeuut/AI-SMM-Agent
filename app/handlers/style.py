@@ -86,7 +86,7 @@ async def select_style(callback: CallbackQuery, state: FSMContext) -> None:
 
 
 @style_router.callback_query(lambda c: CallbackFilters.is_style(data=c.data))
-async def processing_style(callback: CallbackQuery, state: FSMContext) -> None:
+async def processing_style(callback: CallbackQuery, state: FSMContext) -> None: 
     logger.info(f"DEBUG: состояние: {state}")
     category, value = callback.data.split("_", 1)
 

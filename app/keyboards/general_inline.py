@@ -109,7 +109,7 @@ def cancel_or_back():
                           callbacks=["-", "MainMenu"]) # доделать отмену публикации (с предварительным вопросом перед отменой)
 
 def create_post_or_back():
-    return create_buttons(texts=["🆕 Создать новый пост", "⬅️ Вернуться в меню публикаций"],
+    return create_buttons(texts=["✨ Создать пост", "⬅️ Вернуться в меню публикаций"],
                           callbacks=["create_post", "publication"])
 
 

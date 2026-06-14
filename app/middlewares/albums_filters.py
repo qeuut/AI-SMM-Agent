@@ -15,7 +15,7 @@ class AlbumMiddleware(BaseMiddleware):
             event: Message,
             data: Dict[str, Any]
     ) -> Any:
-        # Если это не альбом идем дальше
+        # если не альбом - пропускаем
         if not event.media_group_id:
             return await handler(event, data)
 
@@ -25,12 +25,12 @@ class AlbumMiddleware(BaseMiddleware):
             self.cache[mg_id] = []
         self.cache[mg_id].append(event)
 
-        # Ждем пока прилетят остальные части
+        # ждем остальных частей альбома
         await asyncio.sleep(self.latency)
 
         if event != self.cache.get(mg_id, [])[-1]:
             return
 
-        # Добавляем весь список сообщений в данные для handler
+        # добавляем все что наловили в основной список с медиа
         data["album"] = self.cache.pop(mg_id)
         return await handler(event, data)

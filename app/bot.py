@@ -4,6 +4,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.redis import RedisStorage
 from redis.asyncio import Redis
 
+from AI_SMM_AGENT.app.api.server import run_api_server
 from AI_SMM_AGENT.app.config.settings import settings
 from AI_SMM_AGENT.app.handlers import main_router as main_router
 from AI_SMM_AGENT.app.middlewares.admin_only import AdminOnlyMiddleware
@@ -48,7 +49,10 @@ async def main():
 
     await bot.delete_webhook(drop_pending_updates=True)
     logger.info("Bot started polling")
-    await dp.start_polling(bot)
+    await asyncio.gather(
+        dp.start_polling(bot),
+        run_api_server(bot)
+    )
 
 
 if __name__ == "__main__":

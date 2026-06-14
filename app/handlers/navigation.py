@@ -41,11 +41,15 @@ async def cmd_start(message: Message, state: FSMContext, edit: bool = False) -> 
     )
 
     if edit:
+        await state.clear()
+        logger.info(f"Состояние для {message.from_user.id} было очищено")
         await message.edit_text(text=text, reply_markup=main_menu(), parse_mode="HTML")
         return None
 
     data = await state.get_data()
     await state.clear() # дабы избежать 2-ых кликов по кнопке и 2-ых выполнений этой функции
+    logger.debug(f"Состояние для {message.from_user.id} было очищено")
+
     reply_keyboard_status = data.get("reply_keyboard_status")
 
     if reply_keyboard_status:

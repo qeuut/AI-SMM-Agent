@@ -14,8 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 async def build_style_menu_text(user_id: int, changed_now: str = ""):
-    """Возвращает текст для главного меню настроек с текущими параметрами из БД"""
-
     if not user_id:
         logger.error("Функция ---build_style_menu_text--- ошибка, аргумент user_id - пуст")
         return "Произошла непредвиденная ошибка, попробуйте снова..."

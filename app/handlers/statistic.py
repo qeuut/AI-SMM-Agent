@@ -8,7 +8,7 @@ from aiogram.types import CallbackQuery
 
 # Клавиатуры
 from AI_SMM_AGENT.app.keyboards.general_inline import (
-    statistics_info_btn
+    statistics_info_btn, create_buttons
 )
 from AI_SMM_AGENT.app.keyboards import (
     back_to,
@@ -32,11 +32,21 @@ async def show_statistics(callback: CallbackQuery):
     # Если у пользователя вообще нет постов в базе
     if not stats:
         text = (
-            "<b>📊 Статистика</b>\n\n"
-            "У вас пока нет созданных постов. Как только вы сгенерируете "
-            "первый пост, здесь появится подробная аналитика контента!"
+            "<b>📊 Статистика и аналитика</b>\n\n"
+
+            "У вас пока нет созданных публикаций.\n\n"
+
+            "Как только вы сгенерируете первый материал, искусственный интеллект начнет собирать аналитику, "
+            "и покажет общую статистику вашего контента.\n\n"
+
+            "<blockquote>Создайте свой первый пост прямо сейчас, чтобы открыть этот раздел!</blockquote>"
         )
-        await callback.message.edit_text(text, reply_markup=back_to(), parse_mode="HTML")
+
+        await callback.message.edit_text(text, reply_markup=create_buttons(texts=["✨ Создать пост",
+                                                                                  "⬅️ Вернуться в главное меню"],
+                                                                           callbacks=["create_post",
+                                                                                      "MainMenu"]),
+                                               parse_mode="HTML")
         return
 
     fmt = "%d.%m.%Y %H:%M"

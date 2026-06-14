@@ -11,11 +11,11 @@ logger = logging.getLogger(__name__)
 
 
 def sort_answer_n8n(payload: dict) -> N8NResult:
-    status_str = payload.get("status_generate")
-    post = payload.get("post")
-    question = payload.get("question")
-    reason_reject = payload.get("reason")
-    style_warning = payload.get("style_warning") or None # предупреждение о несоответствии стиля
+    status_str = payload.get("status_generate") or None
+    post = payload.get("post") or None
+    question = payload.get("question") or None
+    reason_reject = payload.get("reason") or None
+    style_warning = payload.get("style_warning") or None # -предупреждение о несоответствии стиля
     media_warning = payload.get("media_warning") or None
     selected_file_ids = payload.get("selected_file_ids") or []
     media_assessment = payload.get("media_assessment") or []
@@ -30,7 +30,7 @@ def sort_answer_n8n(payload: dict) -> N8NResult:
                            post_text=post,
                            question_text=question,
                            reason_reject_text=reason_reject,
-                           media_assessment=media_assessment
+                           media_assessment=media_assessment,
                            )
 
     if n8n_object.status == N8NStatus.SUCCESS:
@@ -45,6 +45,10 @@ def sort_answer_n8n(payload: dict) -> N8NResult:
         logger.info("Пользователь получил уточняющий вопрос от агента")
         text = f"<b>Уточняющий вопрос:</b>\n{n8n_object.question_text}"
 
+    elif n8n_object.status == N8NStatus.CONNECTED:
+        logger.info("Соединение с н8н установлено.")
+        text = "✨ Генерирую пост..."
+
     else:
         text = "Произошла ошибка, вернитесь в главное меню и попробуйте снова"
         logger.error(f"Ошибка в функции ---sort_answer_n8n--- ответ n8n не получается отфильтровать."
@@ -57,7 +61,7 @@ def sort_answer_n8n(payload: dict) -> N8NResult:
     text = strip_markdown(text)
 
 
-    logger.info(f"DEBUG: n8n_object: {n8n_object}, payload: {payload}")  # ======================================= DEBUG
+    logger.debug(f"n8n_object: {n8n_object}, payload: {payload}")  # ======================================= DEBUG
     return N8NResult(status=status,
                      final_text=text,
                      post_text=post,
