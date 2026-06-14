@@ -7,7 +7,7 @@ from fastapi import FastAPI
 import uvicorn
 
 from aiogram import Bot
-from AI_SMM_AGENT.app.api.routers.n8n_callback import get_n8n_router
+from app.api.routers.n8n_callback import get_n8n_router
 
 
 def create_app(bot: Bot) -> FastAPI:
