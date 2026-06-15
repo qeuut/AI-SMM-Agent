@@ -125,9 +125,9 @@ async def handle_shared_chat(message: Message, state: FSMContext):
 
     text = (
         "<b>✅ Канал успешно изменен!</b>\n\n"
-        f"— Название: <code>{channel_title}</code>\n"
-        f"{f'— Ссылка: <b>{channel_username}</b>' if channel_username_status else '— Ссылка отсутствует - <b>канал приватный</b>'}\n"
-        f"— ID: <code>{new_channel_id}</code>\n\n"
+        f"> Название: <code>{channel_title}</code>\n"
+        f"{f'> Ссылка: <b>{channel_username}</b>' if channel_username_status else '> Ссылка: <code>канал приватный</code>'}\n"
+        f"> ID: <code>{new_channel_id}</code>\n\n"
         "<i>⚠️ Не забудьте добавить бота в этот канал администратором, чтобы он мог публиковать посты.</i>"
     )
 

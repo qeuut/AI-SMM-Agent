@@ -79,6 +79,7 @@ class CallbacksPost(str, Enum):
     APPLY_EDIT = "apply_edit"
     RETRY_REQUEST_TO_N8N = "retry_request_to_n8n"
 
+    DRAFT_SAVE = "draft_save"
 
 class CallbacksPublication(str, Enum):
     PUBLICATION = "publication"

@@ -38,6 +38,7 @@ from AI_SMM_AGENT.app.services.n8n_client import n8n_request
 from AI_SMM_AGENT.app.services.post_service import sort_answer_n8n, get_telegram_file_url, publish_to_channel
 from AI_SMM_AGENT.app.repositories.post_repo import db_created_post
 from AI_SMM_AGENT.app.repositories.sessionID_repo import get_or_create_session
+# from AI_SMM_AGENT.app.repositories.draft_repo import draft_saving
 
 # Middleware и Фильтры
 from AI_SMM_AGENT.app.middlewares.albums_filters import AlbumMiddleware
@@ -168,6 +169,7 @@ async def send_request_for_post(callback: CallbackQuery, state: FSMContext) -> M
 
     data = await state.get_data()
     draft_dict = data.get("draft_post")
+    logger.debug(draft_dict)
     if not draft_dict:
         await callback.answer("Не актуально")
         return None
@@ -234,9 +236,15 @@ async def send_request_for_post(callback: CallbackQuery, state: FSMContext) -> M
     elif result.status == N8NStatus.REJECTION:
         markup = clarifying_question()
     else:
-        markup = back_to()
+        markup = back_to() # if is_retry else back_to(text="💾 Сохранить черновик и выйти", callback_data="draft_save")
 
     await message.edit_text(text=result.final_text, reply_markup=markup, parse_mode="HTML")
+
+
+# @posts_router.callback_query(F.data == CallbacksPost.DRAFT_SAVE)
+# async def draft_save(callback: CallbackQuery, state: FSMContext):
+#     await draft_saving()
+
 
 
 @posts_router.callback_query(F.data == CallbacksPost.SHOW_POST)

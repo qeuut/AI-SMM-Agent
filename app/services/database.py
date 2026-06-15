@@ -62,6 +62,11 @@ async def init_db() -> None: # открываем асинхронное сое�
                     )
                 ''')
 
+    # await db.execute('''
+    #                 CREATE TABLE IF NOT EXISTS user_draft (
+    #                     user_id INTEGER PRIMARY KEY,
+    #                     time_created,
+    #                     draft)''')
 
     await db.commit()
     await db.execute('''CREATE INDEX IF NOT EXISTS idx_posts_user_status ON posts(user_id, status);''')

@@ -1,4 +1,5 @@
 # Стандартные библиотеки
+import asyncio
 import logging
 from contextlib import suppress
 
@@ -55,8 +56,8 @@ logger = logging.getLogger(__name__)
                              CallbacksStyle.BANNED_BACK,
                              CallbacksStyle.ADDRESSING_BACK]))
 async def style_brand(callback: CallbackQuery) -> None:
-    style, _ = callback.data.split("_")
-    final_text = await build_style_menu_text(user_id=callback.from_user.id, changed_now=style)
+    # style, _ = callback.data.split("_", maxsplit=1) if callback.data.count("_") == 1 else callback.data.rsplit("_", maxsplit=1)[::-1]
+    final_text = await build_style_menu_text(user_id=callback.from_user.id) # , changed_now=style
 
     buttons, _ = get_buttons_and_text(group_buttons="cat")
     await callback.message.edit_text(text=final_text, reply_markup=buttons, parse_mode="HTML")
@@ -97,7 +98,15 @@ async def processing_style(callback: CallbackQuery, state: FSMContext) -> None:
     with suppress(TelegramBadRequest): # ------------------------------------------------------------ костыль, исправить
         await callback.message.edit_text(text=text, reply_markup=buttons) # ------------------------- костыль, исправить
 
-    await callback.answer("Стиль сохранен...")
+    await callback.answer("Стиль сохранен... Возвращаю назад")
+
+
+    final_text = await build_style_menu_text(user_id=callback.from_user.id, changed_now=category) # , changed_now=style
+    buttons, _ = get_buttons_and_text(group_buttons="cat")
+
+    await asyncio.sleep(1)
+    await callback.message.edit_text(text=final_text, reply_markup=buttons, parse_mode="HTML")
+
 
 
 @style_router.callback_query(F.data.endswith(CallbacksStyle.CUSTOM_PREFIX))
