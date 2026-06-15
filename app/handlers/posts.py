@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from typing import Optional
+from redis.asyncio import Redis
 
 # Сторонние библиотеки
 import pydantic
@@ -163,7 +164,7 @@ async def catch_all(message: Message, state: FSMContext, album: Optional[list[Me
     CallbacksPost.GENERATION_IN_ENY_CASE,
     CallbacksPost.RETRY_REQUEST_TO_N8N
 ]))
-async def send_request_for_post(callback: CallbackQuery, state: FSMContext) -> Message | None:
+async def send_request_for_post(callback: CallbackQuery, state: FSMContext, redis_client: Redis) -> Message | None:
     is_retry = callback.data == CallbacksPost.RETRY_REQUEST_TO_N8N
     message = await callback.message.edit_text("⏳ Повторяю запрос..." if is_retry else "⏳ Отправляю запрос...") # ✨
 
@@ -238,8 +239,8 @@ async def send_request_for_post(callback: CallbackQuery, state: FSMContext) -> M
     else:
         markup = back_to() # if is_retry else back_to(text="💾 Сохранить черновик и выйти", callback_data="draft_save")
 
-    await message.edit_text(text=result.final_text, reply_markup=markup, parse_mode="HTML")
-
+    mssg_id = await message.edit_text(text=result.final_text, reply_markup=markup, parse_mode="HTML")
+    await redis_client.set(f"generation_msg:{message.chat.id}", mssg_id.message_id, ex=600)
 
 # @posts_router.callback_query(F.data == CallbacksPost.DRAFT_SAVE)
 # async def draft_save(callback: CallbackQuery, state: FSMContext):

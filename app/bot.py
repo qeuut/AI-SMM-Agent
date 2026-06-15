@@ -51,7 +51,7 @@ async def main():
     await bot.delete_webhook(drop_pending_updates=True)
     logger.info("Bot started polling")
     await asyncio.gather(
-        dp.start_polling(bot),
+        dp.start_polling(bot, redis_client=redis),
         run_api_server(bot)
     )
 

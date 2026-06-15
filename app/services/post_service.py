@@ -43,11 +43,20 @@ def sort_answer_n8n(payload: dict) -> N8NResult:
 
     elif n8n_object.status == N8NStatus.QUESTION:
         logger.info("Пользователь получил уточняющий вопрос от агента")
-        text = f"<b>Уточняющий вопрос:</b>\n{n8n_object.question_text}"
+        text = (
+            f"🎯 <b>Уточняющий вопрос:</b>\n"
+            f"<blockquote><b>{n8n_object.question_text}</b></blockquote>\n\n"
+            f"✍️ <i>Напишите ответ в поле ввода ниже, и бот продолжит генерацию.</i>"
+        )
+
 
     elif n8n_object.status == N8NStatus.CONNECTED:
         logger.info("Соединение с н8н установлено.")
-        text = "✨ Генерирую пост...\n\n⏱ Примерное время ожидания: 2–3 минуты"
+        text = (
+            "✨ <b>Генерирую ваш пост...</b>\n\n"
+            "⏳ Примерное время ожидания: <code>2–3 минуты</code>\n\n"
+            "<i>Бот пришлет готовый текст прямо в этот чат.</i>"
+        )
 
     else:
         text = "Произошла ошибка, вернитесь в главное меню и попробуйте снова"
