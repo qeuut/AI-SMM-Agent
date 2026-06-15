@@ -1,9 +1,15 @@
+import logging
+
+
 from fastapi import APIRouter
 from pydantic import BaseModel
 from aiogram import Bot
 from aiogram.exceptions import TelegramAPIError
 
 from AI_SMM_AGENT.app.services.post_service import sort_answer_n8n
+
+
+logger = logging.getLogger(__name__)
 
 
 class N8NCallbackPayload(BaseModel):
@@ -45,6 +51,7 @@ def get_n8n_router(bot: Bot) -> APIRouter:
                         text=n8n_object.final_text,
                         parse_mode="HTML",
                     )
+                    logger.info("Функция ---n8n_callback--- сообщение было обновлено")
                 except TelegramAPIError:
                     # eсли сообщение было удалено пользователем
                     await bot.send_message(
@@ -52,6 +59,7 @@ def get_n8n_router(bot: Bot) -> APIRouter:
                         text=n8n_object.final_text,
                         parse_mode="HTML",
                     )
+                    logger.info("Функция ---n8n_callback--- сообщение не было обновлено")
             else:
                 # если кэш в redis отсутствует или истек по ttl
                 await bot.send_message(
@@ -59,6 +67,7 @@ def get_n8n_router(bot: Bot) -> APIRouter:
                     text=n8n_object.final_text,
                     parse_mode="HTML",
                 )
+                logger.info("Функция ---n8n_callback--- сообщение было отправлено")
 
             return {"ok": True}
 
