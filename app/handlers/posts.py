@@ -241,6 +241,7 @@ async def send_request_for_post(callback: CallbackQuery, state: FSMContext, redi
 
     mssg_id = await message.edit_text(text=result.final_text, reply_markup=markup, parse_mode="HTML")
     await redis_client.set(f"generation_msg:{message.chat.id}", mssg_id.message_id, ex=600)
+    logger.info("---send_request_for_post--- message_id сохранен в redis")
 
 # @posts_router.callback_query(F.data == CallbacksPost.DRAFT_SAVE)
 # async def draft_save(callback: CallbackQuery, state: FSMContext):
