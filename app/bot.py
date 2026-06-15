@@ -27,7 +27,7 @@ async def on_shutdown():
 async def main():
     logger.info("Starting bot...")
 
-    redis = Redis.from_url(settings.REDIS_URL)
+    redis = Redis.from_url(settings.REDIS_URL, decode_responses=True)
     storage = RedisStorage(redis=redis)
 
     bot = Bot(token=settings.BOT_TOKEN)
