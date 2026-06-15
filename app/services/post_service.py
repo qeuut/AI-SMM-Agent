@@ -47,7 +47,7 @@ def sort_answer_n8n(payload: dict) -> N8NResult:
 
     elif n8n_object.status == N8NStatus.CONNECTED:
         logger.info("Соединение с н8н установлено.")
-        text = "✨ Генерирую пост...\n\nЭто займет около 2-3 минут"
+        text = "✨ Генерирую пост...\n\n⏱ Примерное время ожидания: 2–3 минуты"
 
     else:
         text = "Произошла ошибка, вернитесь в главное меню и попробуйте снова"
