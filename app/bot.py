@@ -33,6 +33,8 @@ async def main():
     bot = Bot(token=settings.BOT_TOKEN)
     dp = Dispatcher(storage=storage)
 
+    bot.redis = redis
+
     dp.workflow_data["bot"] = bot
 
     # middlewares
