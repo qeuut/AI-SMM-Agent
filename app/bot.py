@@ -52,7 +52,7 @@ async def main():
     logger.info("Bot started polling")
     await asyncio.gather(
         dp.start_polling(bot, redis_client=redis),
-        run_api_server(bot, redis)
+        run_api_server(bot, redis, dp)
     )
 
 
