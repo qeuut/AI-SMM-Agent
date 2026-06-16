@@ -94,7 +94,6 @@ async def process_n8n_response(payload: dict, draft_dict: dict) -> tuple[bool, a
 
     result, markup = await process_n8n_status(n8n_response=n8n_response,draft_dict=draft_dict)
 
-
     return True, result, markup
 
 
