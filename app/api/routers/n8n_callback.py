@@ -50,9 +50,10 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
             reply_markup = None
 
             if success:
+
                 # В случае успеха result — это готовый датакласс N8NResult (из функции sort_answer_n8n)
                 reply_markup = markup  # Берем сгенерированную клавиатуру
-
+                logger.info(f"Кнопки: {reply_markup.__class__.__name__ if reply_markup else 'Отсутствуют (None)'}")
                 # Распределяем логику и тексты на основе статуса из датакласса
                 if result.status == N8NStatus.SUCCESS:
                     text_to_send = result.final_text
