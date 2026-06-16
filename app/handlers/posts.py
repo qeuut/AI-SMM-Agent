@@ -26,7 +26,7 @@ from AI_SMM_AGENT.app.keyboards import back_to
 # Модели и Состояния
 from AI_SMM_AGENT.app.models.draft import MediaInput
 from AI_SMM_AGENT.app.models.n8n import N8NStatus
-from AI_SMM_AGENT.app.services.data_models import DraftPost, MediaType
+from AI_SMM_AGENT.app.models.data_models import DraftPost, MediaType
 from AI_SMM_AGENT.app.utils.states import CreatedPost
 from AI_SMM_AGENT.app.models.n8n_exceptions import N8NError
 from AI_SMM_AGENT.app.models.callbacks import CallbacksPost
@@ -40,6 +40,7 @@ from AI_SMM_AGENT.app.services.post_service import sort_answer_n8n, get_telegram
 from AI_SMM_AGENT.app.repositories.post_repo import db_created_post
 from AI_SMM_AGENT.app.repositories.sessionID_repo import get_or_create_session
 # from AI_SMM_AGENT.app.repositories.draft_repo import draft_saving
+from AI_SMM_AGENT.app.services.working_with_post_status import process_n8n_response
 
 # Middleware и Фильтры
 from AI_SMM_AGENT.app.middlewares.albums_filters import AlbumMiddleware
@@ -60,16 +61,6 @@ posts_router.callback_query.filter(ValidCallbackFilter())
 
 logger = logging.getLogger(__name__)
 
-
-# ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
-
-def _get_photos_from_draft(draft: DraftPost, draft_dict: dict) -> list[dict]:
-    """Возвращает список фото в порядке selected_media_ids."""
-    media_index = {m["file_id"]: m for m in draft_dict.get("media", [])}
-    return [
-        media_index[fid] for fid in draft.selected_media_ids
-        if fid in media_index and media_index[fid]["type"] == "photo"
-    ]
 
 # ==================== ХЕНДЛЕРЫ ====================
 @posts_router.callback_query(F.data == CallbacksPost.CREATE_POST)
@@ -196,52 +187,28 @@ async def send_request_for_post(callback: CallbackQuery, state: FSMContext, redi
 
     logger.info(f"Sending payload for {user_id} | publication_status={forcing_to_generate} | brand={style}")
 
-    try:
-        response = await n8n_request.send_payload(payload)
-    except N8NError as e:
-        logger.error(f"N8N недоступен: {e}")
-        return await message.edit_text("Ошибка, к сожалению сервис недоступен...", reply_markup=retrying_request_and_back())
+    # try:
+    #     response = await n8n_request.send_payload(payload)
+    # except N8NError as e:
+    #     logger.error(f"N8N недоступен: {e}")
+    #     return await message.edit_text("Ошибка, к сожалению сервис недоступен...", reply_markup=retrying_request_and_back())
+    #
+    # if response is None:
+    #     logger.error("Нет ответа от N8N")
+    #     return await message.edit_text("Ошибка, к сожалению сервис недоступен...", reply_markup=retrying_request_and_back())
 
-    if response is None:
-        logger.error("Нет ответа от N8N")
-        return await message.edit_text("Ошибка, к сожалению сервис недоступен...", reply_markup=retrying_request_and_back())
-
-    logger.info(f"N8N response: {response}")
-    result = sort_answer_n8n(response)
+    # logger.info(f"N8N response: {response}")
+    # result = sort_answer_n8n(response)
 
     await state.update_data(current_media=result.media_assessment)
     logger.info(f"Selected file_ids from N8N: {result.selected_file_ids}")
     logger.info(f"Draft media file_ids: {[m['file_id'] for m in draft_dict.get('media', [])]}")
 
-    if result.status == N8NStatus.SUCCESS:
-        draft = DraftPost.model_validate(draft_dict)
-        draft.selected_media_ids = result.selected_file_ids
-        await state.update_data(
-            draft_post=draft.model_dump(),
-            post_state="generated",
-            generated_text=result.post_text
-        )
-
-        photos = _get_photos_from_draft(draft, draft.model_dump())
-        sent_message = await send_post_with_media(
-            callback=callback,
-            text=result.final_text,
-            photos=photos,
-            markup=pre_procedural_actions(),
-            media_already_sent=False # False потому что первый вывод поста
-        )
-        logger.info(f"sent_message ids before save: {sent_message}")
-        await state.update_data(media_sent=True, sent_message=sent_message) # отправили медиа - соответственно ставим True что бы больше не отправлять
-        return None
-
-    elif result.status == N8NStatus.REJECTION:
-        markup = clarifying_question()
-    else:
-        markup = back_to() # if is_retry else back_to(text="💾 Сохранить черновик и выйти", callback_data="draft_save")
-
+    result, markup = await process_n8n_response(payload, draft_dict) # тут SUCCESS не возвращается поэтому без проверок
     mssg_id = await message.edit_text(text=result.final_text, reply_markup=markup, parse_mode="HTML")
+
     await redis_client.set(f"generation_msg:{message.chat.id}", mssg_id.message_id, ex=600)
-    logger.info("---send_request_for_post--- message_id сохранен в redis")
+    logger.info(f"---send_request_for_post--- message_id для {user_id}сохранен в redis")
 
 # @posts_router.callback_query(F.data == CallbacksPost.DRAFT_SAVE)
 # async def draft_save(callback: CallbackQuery, state: FSMContext):

@@ -1,6 +1,6 @@
 import logging
 
-from AI_SMM_AGENT.app.services.data_models import DraftPost, MediaItem
+from AI_SMM_AGENT.app.models.data_models import DraftPost, MediaItem
 from AI_SMM_AGENT.app.models.draft import MediaInput, MediaType
 
 logger = logging.getLogger(__name__)
