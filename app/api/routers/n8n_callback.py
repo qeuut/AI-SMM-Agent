@@ -32,7 +32,10 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
                 user_id=payload.chat_id
             )
 
-            state: FSMContext = dp.fsm.resolve_context(bot, storage_key)
+            state: FSMContext = FSMContext(
+                storage=dp.storage,
+                key=storage_key
+            )
 
             # Извлекаем текущий черновик поста для передачи в оркестратор
             state_data = await state.get_data()
