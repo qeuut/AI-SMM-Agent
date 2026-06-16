@@ -26,12 +26,12 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
     @router.post("/callback")
     async def n8n_callback(payload: N8NCallbackPayload):
         try:
-            # 1. Получаем доступ к FSM-контексту пользователя в Redis
             storage_key = StorageKey(
                 bot_id=bot.id,
                 chat_id=payload.chat_id,
                 user_id=payload.chat_id
             )
+
             state: FSMContext = dp.fsm.resolve_context(bot, storage_key)
 
             # Извлекаем текущий черновик поста для передачи в оркестратор

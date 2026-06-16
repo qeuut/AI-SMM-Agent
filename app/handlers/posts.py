@@ -201,7 +201,7 @@ async def send_request_for_post(callback: CallbackQuery, state: FSMContext, redi
     # logger.info(f"N8N response: {response}")
     # result = sort_answer_n8n(response)
 
-    result, markup = await process_n8n_response(payload, draft_dict)  # тут SUCCESS не возвращается поэтому без проверок
+    success, result, markup = await process_n8n_response(payload, draft_dict)  # тут SUCCESS не возвращается поэтому без проверок
     mssg_id = await message.edit_text(text=result.final_text, reply_markup=markup, parse_mode="HTML")
 
     await state.update_data(current_media=result.media_assessment)
