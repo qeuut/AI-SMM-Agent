@@ -33,8 +33,6 @@ async def main():
     bot = Bot(token=settings.BOT_TOKEN)
     dp = Dispatcher(storage=storage)
 
-    bot.redis = redis
-
     dp.workflow_data["bot"] = bot
 
     # middlewares
@@ -54,7 +52,7 @@ async def main():
     logger.info("Bot started polling")
     await asyncio.gather(
         dp.start_polling(bot, redis_client=redis),
-        run_api_server(bot)
+        run_api_server(bot, redis)
     )
 
 

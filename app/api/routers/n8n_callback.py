@@ -1,11 +1,12 @@
 import logging
-
 from fastapi import APIRouter
 from pydantic import BaseModel
 from aiogram import Bot
 from aiogram.exceptions import TelegramAPIError
+from redis.asyncio import Redis
 
 from AI_SMM_AGENT.app.services.post_service import sort_answer_n8n
+
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ class N8NCallbackPayload(BaseModel):
     post: str | None = None
 
 
-def get_n8n_router(bot: Bot) -> APIRouter:
+def get_n8n_router(bot: Bot, redis: Redis) -> APIRouter:
     router = APIRouter(prefix="/n8n", tags=["n8n"])
 
     @router.post("/callback")
@@ -31,21 +32,20 @@ def get_n8n_router(bot: Bot) -> APIRouter:
                     "error": "Failed to process n8n payload"
                 }
 
-            redis_client = getattr(bot, "redis", None)
+
             message_id = None
 
-            if redis_client:
-                key = f"generation_msg:{payload.chat_id}"
-                cached_msg_id = await redis_client.get(key)
+            key = f"generation_msg:{payload.chat_id}"
+            cached_msg_id = await redis.get(key)
 
-                # Добавляем лог для отладки кэша
-                logger.debug("ищу ключ '{key}' | Получено значение: {cached_msg_id} (тип: {type(cached_msg_id)})")
+            # лог для отладки кэша
+            logger.debug(f"ищу ключ '{key}' | Получено значение: {cached_msg_id} (тип: {type(cached_msg_id)})")
 
-                if cached_msg_id:
-                    message_id = int(cached_msg_id)
-                    await redis_client.delete(key)  # очистка кэша после успешного получения
+            if cached_msg_id:
+                message_id = int(cached_msg_id)
+                await redis.delete(key)  # очистка кэша после успешного получения
             else:
-                logger.warning("WARNING: redis_client не найден в объекте bot!")
+                logger.warning("Функция ---n8n_callback--- redis_client не найден в объекте bot")
 
             # eсли id найден в redis
             if message_id:
@@ -78,14 +78,14 @@ def get_n8n_router(bot: Bot) -> APIRouter:
             return {"ok": True}
 
         except TelegramAPIError as e:
-            logger.error(f"Telegram error в n8n_callback: {e}")
+            logger.error(f"Функция ---n8n_callback--- Telegram error: {e}")
             return {
                 "ok": False,
                 "error": f"Telegram error: {e}"
             }
 
         except Exception as e:
-            logger.error(f"Критическая ошибка в n8n_callback: {e}")
+            logger.error(f"Функция ---n8n_callback--- критическая ошибка: {e}")
             return {
                 "ok": False,
                 "error": str(e)
