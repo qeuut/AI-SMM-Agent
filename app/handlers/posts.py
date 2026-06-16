@@ -173,7 +173,8 @@ async def send_request_for_post(callback: CallbackQuery, state: FSMContext, redi
     style = await get_style(user_id)
 
     if not user_session_id:
-        return await message.answer("Произошла ошибка управлением памятью контекста ИИ-агента, попробуйте заново...", reply_markup=back_to())
+        return await message.answer("Произошла ошибка управлением памятью контекста ИИ-агента, попробуйте заново...",
+                                    reply_markup=back_to())
 
     payload = {
         "action": "GENERATE_POST",
@@ -200,12 +201,12 @@ async def send_request_for_post(callback: CallbackQuery, state: FSMContext, redi
     # logger.info(f"N8N response: {response}")
     # result = sort_answer_n8n(response)
 
+    result, markup = await process_n8n_response(payload, draft_dict)  # тут SUCCESS не возвращается поэтому без проверок
+    mssg_id = await message.edit_text(text=result.final_text, reply_markup=markup, parse_mode="HTML")
+
     await state.update_data(current_media=result.media_assessment)
     logger.info(f"Selected file_ids from N8N: {result.selected_file_ids}")
     logger.info(f"Draft media file_ids: {[m['file_id'] for m in draft_dict.get('media', [])]}")
-
-    result, markup = await process_n8n_response(payload, draft_dict) # тут SUCCESS не возвращается поэтому без проверок
-    mssg_id = await message.edit_text(text=result.final_text, reply_markup=markup, parse_mode="HTML")
 
     await redis_client.set(f"generation_msg:{message.chat.id}", mssg_id.message_id, ex=600)
     logger.info(f"---send_request_for_post--- message_id для {user_id}сохранен в redis")
@@ -274,7 +275,8 @@ async def cmd_publishing_post(callback: CallbackQuery, state: FSMContext):
     try:
         if generated_text is None:
             logger.critical("Пост утерян в cmd_publishing_post — generated_text = None")
-            await callback.message.answer("Произошла ошибка, пост не сохранён. Попробуйте снова.", reply_markup=publishing_post())
+            await callback.message.answer("Произошла ошибка, пост не сохранён. Попробуйте снова.",
+                                          reply_markup=publishing_post())
             return
 
         draft = DraftPost.model_validate(data.get("draft_post"))
@@ -293,7 +295,8 @@ async def cmd_publishing_post(callback: CallbackQuery, state: FSMContext):
 
     except Exception as e:
         logger.critical(f"Пост не сохранён в БД: {e}", exc_info=True)
-        await callback.message.edit_text("Произошла ошибка, пост не сохранён. Попробуйте снова.", reply_markup=publishing_post())
+        await callback.message.edit_text("Произошла ошибка, пост не сохранён. Попробуйте снова.",
+                                         reply_markup=publishing_post())
         return
 
     await state.update_data(post_state="published")
@@ -303,7 +306,9 @@ async def cmd_publishing_post(callback: CallbackQuery, state: FSMContext):
         text=generated_text,
         draft_object=data.get("draft_post")
     )
-    await callback.message.edit_text(text="<b>Пост был успешно опубликован</b>", reply_markup=manage_current_post(), parse_mode="HTML")
+    await callback.message.edit_text(text="<b>Пост был успешно опубликован</b>",
+                                     reply_markup=manage_current_post(),
+                                     parse_mode="HTML")
 
 
 @posts_router.callback_query(F.data == CallbacksPost.EDIT_CURRENT_POST)
@@ -321,7 +326,7 @@ async def edit_current_post(callback: CallbackQuery, state: FSMContext):
 
     await state.update_data(message_id=user_mssg.message_id)
     await state.set_state(CreatedPost.WaitMessForPost)
-    await state.update_data(edit_mode=True) # - было еще draft_post=None - убрал потому что тогда бот считал бы что активного поста нет для планирования
+    await state.update_data(edit_mode=True)
 
 
 @posts_router.callback_query(F.data == CallbacksPost.APPLY_EDIT)
@@ -333,7 +338,8 @@ async def apply_edit(callback: CallbackQuery, state: FSMContext):
 
     session_id = await get_or_create_session(user_id=user_id, mode=SessionModes.GET_SESSION_ID)
     if not session_id:
-        return await callback.message.answer("Произошла ошибка управлением памятью контекста ИИ-агента, попробуйте заново...", reply_markup=back_to())
+        return await callback.message.answer("Произошла ошибка управлением памятью контекста ИИ-агента, попробуйте заново...",
+                                             reply_markup=back_to())
 
     payload = {
         "action": "EDIT_POST",
@@ -348,11 +354,13 @@ async def apply_edit(callback: CallbackQuery, state: FSMContext):
         response = await n8n_request.send_payload(payload)
     except N8NError as e:
         logger.error(f"N8N недоступен: {e}")
-        return await callback.message.edit_text("Ошибка, к сожалению сервис недоступен...", reply_markup=retrying_request_and_back())
+        return await callback.message.edit_text("Ошибка, к сожалению сервис недоступен...",
+                                                reply_markup=retrying_request_and_back())
 
     if response is None:
         logger.error("Нет ответа от N8N")
-        return await callback.message.edit_text("Ошибка, к сожалению сервис недоступен...", reply_markup=retrying_request_and_back())
+        return await callback.message.edit_text("Ошибка, к сожалению сервис недоступен...",
+                                                reply_markup=retrying_request_and_back())
 
     logger.info(f"N8N response: {response}")
     result = sort_answer_n8n(response)
@@ -382,7 +390,8 @@ async def answer_on_question_about_post(message: Message, state: FSMContext):
 
     user_session_id = await get_or_create_session(user_id=user_id, mode=SessionModes.GET_SESSION_ID)
     if not user_session_id:
-        return await message.answer("Произошла ошибка управлением памятью контекста ИИ-агента, попробуйте заново...", reply_markup=back_to())
+        return await message.answer("Произошла ошибка управлением памятью контекста ИИ-агента, попробуйте заново...",
+                                    reply_markup=back_to())
 
     payload = {
         "action": "CORRECTING_CURRENT_POST",
@@ -397,11 +406,17 @@ async def answer_on_question_about_post(message: Message, state: FSMContext):
         response = await n8n_request.send_payload(payload)
     except N8NError as e:
         logger.error(f"N8N недоступен: {e}")
-        return await message.bot.edit_message_text(chat_id=message.chat.id, message_id=bot_mssg_id, text="Ошибка, к сожалению сервис недоступен...", reply_markup=retrying_request_and_back())
+        return await message.bot.edit_message_text(chat_id=message.chat.id,
+                                                   message_id=bot_mssg_id,
+                                                   text="Ошибка, к сожалению сервис недоступен...",
+                                                   reply_markup=retrying_request_and_back())
 
     if response is None:
         logger.error("Нет ответа от N8N")
-        return await message.bot.edit_message_text(chat_id=message.chat.id, message_id=bot_mssg_id, text="Ошибка, к сожалению сервис недоступен...", reply_markup=retrying_request_and_back())
+        return await message.bot.edit_message_text(chat_id=message.chat.id,
+                                                   message_id=bot_mssg_id,
+                                                   text="Ошибка, к сожалению сервис недоступен...",
+                                                   reply_markup=retrying_request_and_back())
 
     logger.info(f"N8N response: {response}")
     result = sort_answer_n8n(response)
