@@ -25,7 +25,7 @@ from AI_SMM_AGENT.app.keyboards import back_to
 
 # Модели и Состояния
 from AI_SMM_AGENT.app.models.draft import MediaInput
-from AI_SMM_AGENT.app.models.n8n import N8NStatus
+from AI_SMM_AGENT.app.models.n8n import N8NStatus, N8NResult
 from AI_SMM_AGENT.app.models.data_models import DraftPost, MediaType
 from AI_SMM_AGENT.app.utils.states import CreatedPost
 from AI_SMM_AGENT.app.models.n8n_exceptions import N8NError
@@ -202,10 +202,19 @@ async def send_request_for_post(callback: CallbackQuery, state: FSMContext, redi
     # result = sort_answer_n8n(response)
 
     success, result, markup = await process_n8n_response(payload, draft_dict)  # тут SUCCESS не возвращается поэтому без проверок
-    mssg_id = await message.edit_text(text=result.final_text, reply_markup=markup, parse_mode="HTML")
 
-    await state.update_data(current_media=result.media_assessment)
-    logger.info(f"Selected file_ids from N8N: {result.selected_file_ids}")
+    if isinstance(result, N8NResult):
+        final_text = result.final_text
+
+        await state.update_data(current_media=result.media_assessment)
+        logger.info(f"Selected file_ids from N8N: {result.selected_file_ids}")
+
+    else:
+        final_text = result
+        markup = retrying_request_and_back()
+
+    mssg_id = await message.edit_text(text=final_text, reply_markup=markup, parse_mode="HTML")
+
     logger.info(f"Draft media file_ids: {[m['file_id'] for m in draft_dict.get('media', [])]}")
 
     await redis_client.set(f"generation_msg:{message.chat.id}", mssg_id.message_id, ex=600)
