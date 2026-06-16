@@ -125,6 +125,7 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
                     reply_markup=reply_markup
                 )
                 logger.info("Отправлено новое сообщение (ID не найден в Redis)")
+            logger.info(f"Кнопки: {reply_markup.__class__.__name__ if reply_markup else 'Отсутствуют (None)'}")
 
             return {"ok": True}
 
