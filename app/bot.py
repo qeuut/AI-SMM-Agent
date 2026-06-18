@@ -37,7 +37,7 @@ async def main():
 
     # middlewares
     dp.message.middleware(AdminOnlyMiddleware())
-    dp.callback_query.middleware(AdminOnlyMiddleware())
+    # dp.callback_query.middleware(AdminOnlyMiddleware())
     dp.message.middleware(CallbackAnswerLogger())
     dp.callback_query.middleware(CallbackAnswerLogger())
 

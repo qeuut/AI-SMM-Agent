@@ -16,7 +16,7 @@ class N8NClient:
     async def send_payload(self, payload: dict) -> any:
         try:
 
-            timeout = aiohttp.ClientTimeout(total=30) # timeout time
+            timeout = aiohttp.ClientTimeout(total=20) # timeout time
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 async with session.post(self.webhook_url, json=payload) as resp:
                     if resp.status != 200:
