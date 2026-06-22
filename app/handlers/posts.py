@@ -41,6 +41,7 @@ from AI_SMM_AGENT.app.repositories.post_repo import db_created_post
 from AI_SMM_AGENT.app.repositories.sessionID_repo import get_or_create_session
 # from AI_SMM_AGENT.app.repositories.draft_repo import draft_saving
 from AI_SMM_AGENT.app.services.working_with_post_status import process_n8n_response
+from AI_SMM_AGENT.app.services.get_photos_from_draft import get_photos_from_draft
 
 # Middleware и Фильтры
 from AI_SMM_AGENT.app.middlewares.albums_filters import AlbumMiddleware
@@ -240,7 +241,7 @@ async def show_post(callback: CallbackQuery, state: FSMContext):
         )
 
     draft = DraftPost.model_validate(draft_dict) if draft_dict else None
-    photos = _get_photos_from_draft(draft, draft_dict) if draft else []
+    photos = get_photos_from_draft(draft, draft_dict) if draft else []
 
     logger.info(f"show_post: selected_ids={draft.selected_media_ids if draft else []}, photos count={len(photos)}")
 
