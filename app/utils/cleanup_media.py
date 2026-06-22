@@ -7,7 +7,11 @@ async def cleanup_media_messages(bot, chat_id: int, state):
     data = await state.get_data()
     sent_messages = data.get("sent_message")
 
-    logger.warning(f"DEBUG: Сейчас в sent_messages лежит: {sent_messages}")
+    logger.debug(
+        f"sent_messages={sent_messages}, "
+        f"type={type(sent_messages)}, "
+        f"len={len(sent_messages) if sent_messages else 0}"
+    )
 
     if sent_messages:
         sent_messages.pop(-1) # не удаляем текстовую часть потому что она всегда идет последней, а у нас везде edit_text
