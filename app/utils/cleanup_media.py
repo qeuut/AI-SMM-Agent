@@ -11,6 +11,7 @@ async def cleanup_media_messages(bot, chat_id: int, state):
         f"sent_messages={sent_messages}, "
         f"type={type(sent_messages)}, "
         f"len={len(sent_messages) if sent_messages else 0}"
+        f"item_type={type(sent_messages[0])}"
     )
 
     if sent_messages:
