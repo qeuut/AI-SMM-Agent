@@ -73,7 +73,7 @@ async def cmd_schedule_post(callback: CallbackQuery, state: FSMContext, bot: Bot
         await callback.message.edit_text(
             "Напишите удобное время для публикации.\n\n"
             "Например: <i>завтра в 15:00</i>, <i>в среду вечером</i>, <i>25 июня в 18:30</i>",
-            reply_markup=back_to(text="⬅️ Вернуться в меню публикаций", callback_data="publication"),
+            reply_markup=back_to(text="⬅️ Вернуться назад", callback_data="show_post"),
             parse_mode="HTML"
         )
         await state.set_state(SchedulePost.WaitScheduleTime)
