@@ -1,15 +1,6 @@
-import logging
-from fastapi import APIRouter
-from pydantic import BaseModel
-from aiogram import Bot, Dispatcher
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.storage.base import StorageKey
-from aiogram.exceptions import TelegramAPIError
-from redis.asyncio import Redis
-
-from AI_SMM_AGENT.app.services.post_service import sort_answer_n8n
-from AI_SMM_AGENT.app.services.working_with_post_status import process_n8n_response
-from AI_SMM_AGENT.app.models.n8n import N8NStatus
+# from AI_SMM_AGENT.app.services.post_service import sort_answer_n8n
+# from AI_SMM_AGENT.app.services.working_with_post_status import process_n8n_response
+# from AI_SMM_AGENT.app.models.n8n import N8NStatus
 
 import logging
 from fastapi import APIRouter
@@ -20,7 +11,7 @@ from aiogram.fsm.storage.base import StorageKey
 from aiogram.exceptions import TelegramAPIError
 from redis.asyncio import Redis
 
-# Импортируем только чистую функцию парсинга
+
 from AI_SMM_AGENT.app.services.working_with_post_status import process_n8n_status
 from AI_SMM_AGENT.app.models.n8n import N8NStatus
 
@@ -39,7 +30,6 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
     @router.post("/callback")
     async def n8n_callback(payload: N8NCallbackPayload):
         try:
-            # 1. Подключаемся к FSM-контексту пользователя в Redis
             storage_key = StorageKey(
                 bot_id=bot.id,
                 chat_id=payload.chat_id,
@@ -51,21 +41,16 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
                 key=storage_key
             )
 
-            # Извлекаем текущий черновик поста из FSM
             state_data = await state.get_data()
             draft_dict = state_data.get("draft_post", {})
 
-            # 2. ЧИСТЫЙ ПАРСИНГ БЕЗ ПОВТОРНОЙ СЕТИ
-            # Передаем сырой payload.model_dump() прямо в функцию парсинга
             result, reply_markup = await process_n8n_status(
                 n8n_response=payload.model_dump(),
                 draft_dict=draft_dict
             )
 
-            # Переменные для текста сообщения
             text_to_send = None
 
-            # 3. Распределяем логику и тексты на основе статуса из датакласса N8NResult
             logger.info(f"Получен статус от N8N: {result.status}")
 
             if result.status == N8NStatus.SUCCESS:
@@ -76,7 +61,6 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
 
             elif result.status == N8NStatus.REJECTION:
                 text_to_send = result.reason_reject_text
-                # Переводим пользователя в режим ожидания нового ввода/уточнения
                 await state.set_state("waiting_for_user_clarification")
 
             elif result.status == N8NStatus.QUESTION:
@@ -84,13 +68,11 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
                 await state.set_state("waiting_for_user_clarification")
 
             else:
-                # Для остальных статусов (error, unknown, connected)
                 text_to_send = result.final_text or "Обработка запроса завершена."
 
             if not text_to_send:
                 text_to_send = "Получен пустой ответ от системы ИИ."
 
-            # 4. Логика работы с кэшем загрузочного сообщения в Redis
             message_id = None
             key = f"generation_msg:{payload.chat_id}"
             cached_msg_id = await redis.get(key)
@@ -99,11 +81,10 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
 
             if cached_msg_id:
                 message_id = int(cached_msg_id)
-                await redis.delete(key)  # Чистим кэш
+                await redis.delete(key)  # очистка кэша
             else:
                 logger.warning(f"ID загрузочного сообщения не найден в Redis для чата {payload.chat_id}")
 
-            # 5. Отправка результата пользователю (Редактирование или Новое сообщение)
             if message_id:
                 try:
                     await bot.edit_message_text(
@@ -140,7 +121,7 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
             logger.error(f"Telegram error в n8n_callback: {e}")
             return {"ok": False, "error": f"Telegram error: {e}"}
         except Exception as e:
-            logger.error(f"Критическая ошибка в n8n_callback: {e}")
+            logger.error(f"Ошибка в n8n_callback: {e}")
             return {"ok": False, "error": str(e)}
 
     return router
