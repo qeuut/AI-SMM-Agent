@@ -88,7 +88,7 @@ def skip_question_or_back():
 
 def retrying_request_and_back():
     return create_buttons(texts=["🔄 Попробовать снова", "⬅️ Вернуться в главное меню"],
-                          callbacks=["retry_request_to_n8n", "MainMenu"]) # ============================================================================================================= ТУТ ЗАГЛУШКА
+                          callbacks=["retry_request_to_n8n", "MainMenu"])
 
 
 def manage_current_post():
@@ -96,7 +96,7 @@ def manage_current_post():
                           callbacks=["-", "MainMenu"])
 
 
-def y_or_n(callbacks: list[str]):
+def y_or_n_for_sync_post(callbacks: list[str]):
     if len(callbacks) == 2:
         return create_buttons(texts=["✅ Да", "❌ Нет"], callbacks=[callbacks[0], callbacks[1]])
 
@@ -106,7 +106,11 @@ def y_or_n(callbacks: list[str]):
 
 def cancel_or_back():
     return create_buttons(texts=["❌ Отменить публикацию", "⬅️ Вернуться в главное меню"],
-                          callbacks=["-", "MainMenu"]) # доделать отмену публикации (с предварительным вопросом перед отменой)
+                          callbacks=["cancel_post_scheduling", "MainMenu"]) # доделать отмену публикации (с предварительным вопросом перед отменой)
+
+def y_or_n_for_cancel_post():
+    return create_buttons(texts=["✅ Да, отменить", "❌ Нет, в главное меню"],
+                          callbacks=["cancel_post_scheduling_back", "MainMenu"]) # доделать отмену публикации (с предварительным вопросом перед отменой)
 
 def create_post_or_back():
     return create_buttons(texts=["✨ Создать пост", "⬅️ Вернуться в меню публикаций"],

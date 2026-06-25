@@ -9,15 +9,17 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import StateFilter
 
+from AI_SMM_AGENT.app.handlers.posts import show_post
 # Клавиатуры
 from AI_SMM_AGENT.app.keyboards.general_inline import (
-    publication_main, manage_current_post, y_or_n,
-    cancel_or_back, create_post_or_back,
+    publication_main, manage_current_post, y_or_n_for_sync_post,
+    cancel_or_back, create_post_or_back, y_or_n_for_cancel_post
 )
 from AI_SMM_AGENT.app.keyboards import back_to, create_buttons
 
 # Репозитории
 from AI_SMM_AGENT.app.repositories.post_repo import db_created_post
+from AI_SMM_AGENT.app.repositories.post_repo import cancel_schedule_post
 
 # Модели
 from AI_SMM_AGENT.app.models.callbacks import CallbacksPublication, CallbacksPost
@@ -87,7 +89,7 @@ async def cmd_schedule_post(callback: CallbackQuery, state: FSMContext, bot: Bot
         )
 
 
-@publication_router.message(StateFilter(SchedulePost.WaitScheduleTime))
+@publication_router.message(SchedulePost.WaitScheduleTime)
 async def get_time_for_plan(message: Message, state: FSMContext):
     logger.info(f"Пользователь {message.from_user.id} ввёл время: '{message.text}'")
     data = await state.get_data()
@@ -134,7 +136,7 @@ async def get_time_for_plan(message: Message, state: FSMContext):
             # текста под 2+ поста и предупреждение об этом например: на это время уже запланировано (количество постов)
             #вы уверены, что хотите запланировать (количество+1) пост?
             parse_mode="HTML",
-            reply_markup=y_or_n(callbacks=[CallbacksPublication.YES_ANSWER, CallbacksPost.SHOW_POST])
+            reply_markup=y_or_n_for_sync_post(callbacks=[CallbacksPublication.YES_ANSWER, CallbacksPost.SHOW_POST])
         )
         return
 
@@ -143,16 +145,16 @@ async def get_time_for_plan(message: Message, state: FSMContext):
         "selected_media_ids": draft_dict.get("selected_media_ids", []) if draft_dict else []
     }, ensure_ascii=False)
 
-    await db_created_post(
-        user_id=message.from_user.id,
-        draft_json=draft_json,
-        at="scheduled_at",
-        status="scheduled",
-        time=scheduled_time
-    )
+    post_id = await db_created_post(
+                   user_id=message.from_user.id,
+                   draft_json=draft_json,
+                   at="scheduled_at",
+                   status="scheduled",
+                   time=scheduled_time
+                )
 
     logger.info(f"Пользователь {message.from_user.id} — пост записан в БД со статусом scheduled на {scheduled_time}")
-    await state.update_data(post_state="scheduled")
+    await state.update_data(post_state="scheduled", post_id=post_id)
     await message.answer(
         f"✅ Пост запланирован на <b>{scheduled_time}</b>",
         reply_markup=cancel_or_back(),
@@ -160,9 +162,31 @@ async def get_time_for_plan(message: Message, state: FSMContext):
     )
 
 @publication_router.callback_query(F.data == CallbacksPublication.YES_ANSWER)
-async def set_fsm_for_y_answer(callback: CallbackQuery, state: FSMContext):
+async def sync_post_yes_answer(callback: CallbackQuery, state: FSMContext):
     await state.update_data(scheduled_in_eny_case=True)
     await get_time_for_plan(message=callback.message, state=state)
+
+
+@publication_router.callback_query(F.data == CallbacksPublication.CANCEL_POST_SCHEDULING)
+async def question_about_cancel_scheduling_post(callback: CallbackQuery, state: FSMContext):
+    await callback.message.answer("Вы уверены что хотите отменить планирование текущего поста?",
+                                  reply_markup=y_or_n_for_cancel_post())
+
+
+@publication_router.callback_query(F.data == CallbacksPublication.CANCEL_POST_SCHEDULING_BACK)
+async def cancel_scheduling_post(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    post_id = data.get("post_id")
+
+    delete_status = await cancel_schedule_post(callback.from_user.id, post_id=post_id)
+    if delete_status:
+        await callback.answer("Удалено. Возврат...")
+        await show_post(callback=callback, state=state)
+
+    else:
+        await callback.message.answer("Произошла ошибка при удалении поста из очереди на публикацию...\nПопробуйте в меню публикаций.",
+                                      reply_markup=back_to())
+
 
 
 @publication_router.callback_query(F.data == CallbacksPublication.QUEUE_PUBLICATION)

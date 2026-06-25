@@ -84,3 +84,40 @@ async def get_all_posts(user_id: int) -> ReturnedPostStat | None:
         last_scheduled_post_date=last_scheduled_post_date,
         last_published_post_date=last_published_post_date,
     )
+
+
+async def cancel_schedule_post(user_id: int, post_id: int) -> bool:
+    if not user_id or not post_id:
+        logger.error("Функция ---cancel_post--- не передан один из аргументов")
+        return False
+
+    db = await get_db()
+    cursor = await db.execute(
+        "DELETE FROM posts WHERE user_id = ? AND post_id = ?", (user_id, post_id)
+    )
+
+    await db.commit()
+
+    if cursor.rowcount > 0:
+        logger.info(f"---cancel_post--- Успешно удален пост ID: {post_id} для user_id: {user_id}")
+
+    else:
+        logger.error(f"---cancel_post--- Пост ID: {post_id} не был удален для {user_id}")
+        return False
+
+    return True
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

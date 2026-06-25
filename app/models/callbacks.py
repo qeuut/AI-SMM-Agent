@@ -87,6 +87,8 @@ class CallbacksPublication(str, Enum):
     QUEUE_PUBLICATION = "queue_publication"
     PUBLISHED_POST = "published_posts"
     YES_ANSWER = "yes_answer"
+    CANCEL_POST_SCHEDULING = "cancel_post_scheduling"
+    CANCEL_POST_SCHEDULING_BACK = "cancel_post_scheduling_back"
 
 
 class CallbacksSettings(str, Enum):
