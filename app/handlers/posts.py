@@ -19,7 +19,7 @@ from AI_SMM_AGENT.app.keyboards.general_inline import (
     pre_procedural_actions, publishing_post,
     clarifying_question, skip_question_or_back,
     edit_post_back_or_generate, retrying_request_and_back,
-    manage_current_post, edit_post_back
+    manage_current_post, edit_post_back, y_or_no_for_delete_post
 )
 from AI_SMM_AGENT.app.keyboards import back_to
 
@@ -37,11 +37,12 @@ from AI_SMM_AGENT.app.services.draft import draft_working
 from AI_SMM_AGENT.app.services.saved_style import get_style
 from AI_SMM_AGENT.app.services.n8n_client import n8n_request
 from AI_SMM_AGENT.app.services.post_service import sort_answer_n8n, get_telegram_file_url, publish_to_channel
-from AI_SMM_AGENT.app.repositories.post_repo import db_created_post
+from AI_SMM_AGENT.app.repositories.post_repo import db_created_post, get_channel_message_ids
 from AI_SMM_AGENT.app.repositories.sessionID_repo import get_or_create_session
 # from AI_SMM_AGENT.app.repositories.draft_repo import draft_saving
 from AI_SMM_AGENT.app.services.working_with_post_status import process_n8n_response
 from AI_SMM_AGENT.app.services.get_photos_from_draft import get_photos_from_draft
+
 
 # Middleware и Фильтры
 from AI_SMM_AGENT.app.middlewares.albums_filters import AlbumMiddleware
@@ -55,6 +56,7 @@ from AI_SMM_AGENT.app.utils.cleanup_media import cleanup_media_messages
 
 # UI Сервисы
 from AI_SMM_AGENT.app.UI_Services.send_media_post import send_post_with_media
+
 
 posts_router = Router()
 posts_router.message.middleware(AlbumMiddleware())
@@ -295,13 +297,23 @@ async def cmd_publishing_post(callback: CallbackQuery, state: FSMContext):
             "selected_media_ids": draft.selected_media_ids
         }, ensure_ascii=False)
 
-        await db_created_post(
-            user_id=callback.from_user.id,
-            draft_json=post_record,
-            at="published_at",
-            status="published",
-            time=moscow_time.strftime("%Y-%m-%d %H:%M:%S")
+        published_ids = await publish_to_channel(
+            bot=callback.bot,
+            channel_id=settings.CHANNEL_ID,
+            text=generated_text,
+            draft_object=data.get("draft_post")
         )
+
+        post_id = await db_created_post(
+                        user_id=callback.from_user.id,
+                        draft_json=post_record,
+                        at="published_at",
+                        status="published",
+                        time=moscow_time.strftime("%Y-%m-%d %H:%M:%S"),
+                        message_ids=published_ids
+                    )
+
+        await state.update_data(post_id=post_id)
 
     except Exception as e:
         logger.critical(f"Пост не сохранён в БД: {e}", exc_info=True)
@@ -310,15 +322,38 @@ async def cmd_publishing_post(callback: CallbackQuery, state: FSMContext):
         return
 
     await state.update_data(post_state="published")
-    await publish_to_channel(
-        bot=callback.bot,
-        channel_id=settings.CHANNEL_ID,
-        text=generated_text,
-        draft_object=data.get("draft_post")
-    )
+
     await callback.message.edit_text(text="<b>Пост был успешно опубликован</b>",
                                      reply_markup=manage_current_post(),
                                      parse_mode="HTML")
+
+
+@posts_router.callback_query(F.data == CallbacksPost.DELETE_POST_FROM_CHANNEL_QUESTION_YES)
+async def delete_post_from_channel(callback: CallbackQuery):
+    await callback.message.edit_text("Вы уверены что хотите удалить последний пост который вы только что выложили с канала?",
+                                     reply_markup=y_or_no_for_delete_post())
+
+
+@posts_router.callback_query(F.data == CallbacksPost.DELETE_POST_FROM_CHANNEL)
+async def delete_post_from_channel(callback: CallbackQuery, state: FSMContext, bot: Bot):
+    data = await state.get_data()
+    post_id = data.get("post_id")
+
+    messages_ids = await get_channel_message_ids(user_id=callback.from_user.id, post_id=post_id)
+
+    for message_id in messages_ids:
+        try:
+            await bot.delete_message(chat_id=settings.CHANNEL_ID, message_id=message_id)
+        except TelegramAPIError as e:
+            logger.error(f"Не удалось удалить пост {messages_ids}: {e}")
+            await callback.message.edit_text("Произошла ошибка при удалении поста...\nПопробуйте вручную")
+            return
+
+    await callback.message.edit_text(
+        "<b>Пост успешно удалён из канала</b>",
+        reply_markup=back_to(),
+        parse_mode="HTML"
+    )
 
 
 @posts_router.callback_query(F.data == CallbacksPost.EDIT_CURRENT_POST)

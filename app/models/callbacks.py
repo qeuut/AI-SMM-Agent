@@ -81,6 +81,10 @@ class CallbacksPost(str, Enum):
 
     DRAFT_SAVE = "draft_save"
 
+    DELETE_POST_FROM_CHANNEL = "delete_post_from_channel"
+    DELETE_POST_FROM_CHANNEL_QUESTION_YES = "delete_from_channel_question_yes"
+
+
 class CallbacksPublication(str, Enum):
     PUBLICATION = "publication"
     SCHEDULED_POST = "schedule_post"

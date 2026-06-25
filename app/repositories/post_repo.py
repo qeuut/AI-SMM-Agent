@@ -9,16 +9,18 @@ from AI_SMM_AGENT.app.models.stat_of_post import ReturnedPostStat
 logger = logging.getLogger(__name__)
 
 
-async def db_created_post(user_id: int, draft_json: str, time: str | None, status: str, at: str = "") -> int:
+async def db_created_post(user_id: int, draft_json: str, time: str | None, status: str, at: str = "", message_ids: list[int] | None = None) -> int:
     if at not in ["created_at", "scheduled_at", "published_at"]:
         logger.error("Аргумент ---at--- в функции ---db_created_post--- не равен ожидаемому значению. Взято значение: created_at")
         at = "created_at"
 
     db = await get_db()
 
+    channel_message_id = json.dumps(message_ids)
+
     cursor = await db.execute(f"""
-            INSERT INTO posts (user_id, draft_json, {at}, status) values(?, ?, ?, ?)""",
-            (user_id, draft_json, time, status))
+            INSERT INTO posts (user_id, draft_json, {at}, status, message_ids) values(?, ?, ?, ?, ?)""",
+            (user_id, draft_json, time, status, channel_message_id))
 
     await db.commit()
     return cursor.lastrowid
@@ -106,6 +108,26 @@ async def cancel_schedule_post(user_id: int, post_id: int) -> bool:
         return False
 
     return True
+
+
+async def get_channel_message_ids(user_id: int, post_id: int) -> list[int]:
+    db = await get_db()
+    cursor = await db.execute(
+        "SELECT message_ids FROM posts WHERE user_id = ? AND post_id = ?",
+        (user_id, post_id)
+    )
+    row = await cursor.fetchone()
+    if not row or not row["message_ids"]:
+        return []
+    return json.loads(row["message_ids"])
+
+
+
+
+
+
+
+
 
 
 

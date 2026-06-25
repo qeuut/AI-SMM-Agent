@@ -50,7 +50,8 @@ async def init_db() -> None: # открываем асинхронное сое�
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     scheduled_at TIMESTAMP DEFAULT NULL,
                     published_at TIMESTAMP DEFAULT NULL,
-                    status TEXT NOT NULL DEFAULT 'draft'
+                    status TEXT NOT NULL DEFAULT 'draft',
+                    channel_message_ids TEXT DEFAULT NULL
                 ) 
             ''') # statuses: 'draft', 'ready', 'published', 'scheduled'
 
@@ -68,5 +69,12 @@ async def init_db() -> None: # открываем асинхронное сое�
     #                     time_created,
     #                     draft)''')
 
+    try:
+        await db.execute('ALTER TABLE posts ADD COLUMN message_ids TEXT DEFAULT NULL')
+        await db.commit()
+    except Exception:
+        pass  # - колонка существует
+
     await db.commit()
-    await db.execute('''CREATE INDEX IF NOT EXISTS idx_posts_user_status ON posts(user_id, status);''')
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_posts_user_status ON posts(user_id, status)')
+    await db.commit()

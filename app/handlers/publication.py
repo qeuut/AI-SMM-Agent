@@ -169,7 +169,7 @@ async def sync_post_yes_answer(callback: CallbackQuery, state: FSMContext):
 
 @publication_router.callback_query(F.data == CallbacksPublication.CANCEL_POST_SCHEDULING)
 async def question_about_cancel_scheduling_post(callback: CallbackQuery, state: FSMContext):
-    await callback.message.answer("Вы уверены что хотите отменить планирование текущего поста?",
+    await callback.message.edit_text("Вы уверены что хотите отменить планирование текущего поста?",
                                   reply_markup=y_or_n_for_cancel_post())
 
 

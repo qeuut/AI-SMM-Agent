@@ -93,8 +93,11 @@ def retrying_request_and_back():
 
 def manage_current_post():
     return create_buttons(texts=["❌ Удалить пост с канала", "⬅️ Вернуться в главное меню"], #
-                          callbacks=["-", "MainMenu"])
+                          callbacks=["delete_post_from_channel", "MainMenu"])
 
+def y_or_no_for_delete_post():
+    return create_buttons(texts=["❌ Да, удалить ", "⬅️ Нет, вернутся назад"], #
+                          callbacks=["delete_from_channel_question_yes", "show_post"])
 
 def y_or_n_for_sync_post(callbacks: list[str]):
     if len(callbacks) == 2:
