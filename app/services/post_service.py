@@ -4,6 +4,7 @@ import logging
 
 # с проекта
 from AI_SMM_AGENT.app.models.n8n import N8NStatus, N8NResult
+from AI_SMM_AGENT.app.models.carousels import CarouselResponse
 from aiogram.types import InputMediaPhoto
 
 
@@ -81,9 +82,9 @@ def sort_answer_n8n(payload: dict) -> N8NResult:
 
 
 def strip_markdown(text: str) -> str:
-    text = re.sub(r'#{1,6}\s*', '', text)        # ### заголовки
-    text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)  # **bold** → <b>
-    text = re.sub(r'\*(.*?)\*', r'<i>\1</i>', text)      # *italic* → <i>
+    text = re.sub(r'#{1,6}\s*', '', text)        # заголовки
+    text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)  # в жирный текст
+    text = re.sub(r'\*(.*?)\*', r'<i>\1</i>', text)      # в курсив
     text = re.sub(r'^\d+\.\s+', '', text, flags=re.MULTILINE)  # нумерация
     return text.strip()
 
@@ -132,4 +133,3 @@ async def publish_to_channel(bot, channel_id: int, text: str, draft_object: dict
         published_ids.extend([m.message_id for m in media_msgs])
 
     return published_ids
-

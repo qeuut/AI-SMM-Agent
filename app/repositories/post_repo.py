@@ -5,6 +5,8 @@ import logging
 from AI_SMM_AGENT.app.services.database import get_db
 from AI_SMM_AGENT.app.models.sessions_modes import SessionModes
 from AI_SMM_AGENT.app.models.stat_of_post import ReturnedPostStat
+from AI_SMM_AGENT.app.models.carousels import CarouselResponse, CarouselPostData
+
 
 logger = logging.getLogger(__name__)
 
@@ -122,24 +124,33 @@ async def get_channel_message_ids(user_id: int, post_id: int) -> list[int]:
     return json.loads(row["message_ids"])
 
 
+async def get_carousel_data_from_db(user_id: int, current_page: int, status: str) -> CarouselResponse:
+    db = await get_db() # получаем соединение
 
+    cursor = await db.execute(
+        "SELECT COUNT(*) FROM posts WHERE user_id = ? AND status = ?", (user_id, status) # получаем количество строк с таблицы posts
+    )
+    res = await cursor.fetchone() # получаем количество постов
+    total_count = res[0] if res else 0 # если нет постов то cursor.fetchone() вернет (0,) 0 - False
 
+    offset = current_page - 1 # показатель сколько постов нужно всего пропустить прежде чем показать нужный (для 3-го поста offset = 2 для 4 offset = 3 для 2 offset = 1)
 
+    cursor = await db.execute(
+        "SELECT * FROM posts WHERE user_id = ? AND status = ? ORDER BY created_at DESC LIMIT 1 OFFSET ?", # достаем пост по убыванию времени
+        (user_id, status, offset)
+    )
+    row = await cursor.fetchone() # получаем строку с нужным постом
 
+    if row: # если пост есть
+        post = CarouselResponse.parse_row_to_post(row) # парсим строку с постом sqlite (структура row)
+    else: # если нет, то заполняем модель как в сценарии ошибки
+        post = CarouselPostData(
+            post_id=0, user_id=user_id, status="error", date="-", text="Пост не найден",
+            published_msg_ids="", selected_media_ids=[]
+        )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return CarouselResponse(
+        total_count=total_count,
+        current_page=current_page,
+        post=post
+    )

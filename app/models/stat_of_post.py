@@ -12,3 +12,4 @@ class ReturnedPostStat(BaseModel):
     last_post_about: str | None = None
     last_scheduled_post_date: datetime | None = None
     last_published_post_date: datetime | None = None
+
