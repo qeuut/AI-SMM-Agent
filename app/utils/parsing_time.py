@@ -13,7 +13,7 @@ client = AsyncOpenAI(
 )
 
 
-async def parse_schedule_time(user_text: str) -> dict:
+async def parse_schedule_time(user_text: str, context: list[str]) -> dict:
     now_dt = datetime.now(ZoneInfo("Europe/Moscow"))
     now_str = now_dt.strftime("%Y-%m-%d %H:%M:%S")
     weekday_ru = ["понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье"][now_dt.weekday()]
@@ -29,6 +29,9 @@ async def parse_schedule_time(user_text: str) -> dict:
 
 Текущий момент: {now_str} (Europe/Moscow)
 Сегодня: {weekday_ru}
+
+КОНТЕКСТ ПРЕДЫДУЩИХ СООБЩЕНИЙ:
+{"\n".join(context[:-1]) if len(context) > 1 else "Контекст пока пуст"}
 
 ПРАВИЛА ИНТЕРПРЕТАЦИИ ВРЕМЕНИ
 

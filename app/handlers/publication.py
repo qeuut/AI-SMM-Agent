@@ -96,6 +96,17 @@ async def get_time_for_plan(message: Message, state: FSMContext):
     generated_text = data.get("generated_text")
     draft_dict = data.get("draft_post")
     scheduled_in_eny_case = data.get("scheduled_in_eny_case")
+    context = data.get("context")
+
+    user_message = message.text
+
+    if not context:
+        context = [user_message]
+
+    else:
+        context.append(user_message)
+
+    await state.update_data(context=context)
 
     if not generated_text:
         logger.error(f"Пользователь {message.from_user.id} — generated_text пропал из FSM в get_time_for_plan")
@@ -103,13 +114,18 @@ async def get_time_for_plan(message: Message, state: FSMContext):
         return
 
     logger.info(f"Пользователь {message.from_user.id} — отправляем запрос на парсинг времени")
-    result = await parse_schedule_time(message.text)
+    user_message = message.text
+    result = await parse_schedule_time(user_message, context) # добавить контекст через FSM
     logger.info(f"Пользователь {message.from_user.id} — результат парсинга: {result}")
+
 
     if result.get("datetime") is None:
         question = result.get("question", "Не могу разобрать время, уточните пожалуйста")
+        context.append(question)  #- сохраняем вопрос модели к запросам юзера
+        await state.update_data(context=context)
         logger.warning(f"Пользователь {message.from_user.id} — время не распознано, задаём вопрос: {question}")
-        await message.answer(f"Уточните: {question}")
+        await message.answer(f"Уточните: {question}", reply_markup=back_to(text="⬅️ Вернуться назад",
+                                                                                callback_data="schedule_post"))
         return
 
     scheduled_time = result["datetime"]
