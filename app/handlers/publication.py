@@ -207,7 +207,7 @@ async def cancel_scheduling_post(callback: CallbackQuery, state: FSMContext):
 
 @publication_router.callback_query(
         (F.data == CallbacksPublication.QUEUE_PUBLICATION) |
-        (F.data.startswith(CallbacksPublication.CAROUSEL_POST_SCHEDULED_AT_PREFIX)))
+        (F.data.startswith(CallbacksPublication.CAROUSEL_POST_SCHEDULED_PREFIX)))
 async def queue_posts(callback: CallbackQuery, state: FSMContext) -> None:
     text_queue_is_none = (
         "<b>📋 Очередь публикаций</b>\n\n"
@@ -220,7 +220,7 @@ async def queue_posts(callback: CallbackQuery, state: FSMContext) -> None:
         "<i>Хотите заполнить очередь контентом? Начните генерацию нового материала прямо сейчас.</i>"
     )
 
-    if callback.data.startswith(CallbacksPublication.CAROUSEL_POST_SCHEDULED_AT_PREFIX):
+    if callback.data.startswith(CallbacksPublication.CAROUSEL_POST_SCHEDULED_PREFIX):
         current_page = int(callback.data.split("_")[-1])
         await state.update_data(current_page=current_page)
 
@@ -247,7 +247,7 @@ async def queue_posts(callback: CallbackQuery, state: FSMContext) -> None:
                                          parse_mode="HTML")
         return
 
-    answer_dictory = get_carousel_page_preview(data=carousel_data) # -> {"final_text": "", inline_buttons: {}}
+    answer_dictory = get_carousel_page_preview(data=carousel_data) # -> {"final_text": "", texts: [], callbacks: []}
     await callback.message.edit_text(answer_dictory["final_text"],
                                      reply_markup=create_buttons(texts=answer_dictory["texts"],
                                                                  callbacks=answer_dictory["callbacks"],

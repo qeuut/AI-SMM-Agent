@@ -34,7 +34,6 @@ class CarouselResponse:
         draft_dict = row["draft_json"]
 
         try:
-            # draft_dict = dict(draft_dict)
             draft_dict = json.loads(draft_dict)
             post_text = draft_dict.get("text", "Текст поста отсутствует")
             selected_media_ids = draft_dict.get("selected_media_ids", [])

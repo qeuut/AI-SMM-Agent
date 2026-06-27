@@ -1,4 +1,9 @@
+import logging
 from AI_SMM_AGENT.app.models.carousels import CarouselResponse
+
+
+logger = logging.getLogger(__name__)
+
 
 EMOJI_STATUS = {
     "draft": "📝 Черновик",
@@ -48,16 +53,18 @@ def get_carousel_page_preview(data: CarouselResponse) -> dict:
         "publication"
     ]
 
+    logger.debug(f"callback_data_back = {callback_data_back}\n callback_data_forward = {callback_data_forward}")
+
     return {
         "final_text": (
             f"📋 <b>Просмотр публикации [ {data.current_page} из {data.total_count} ]</b>\n\n"
             f"🔹 <b>Статус:</b> {status_text}\n"
             f"📅 <b>Дата публикации:</b> {data.post.date}\n"
             f"🆔 <b>ID Поста:</b> <code>#{data.post.post_id}</code>\n"
-            f"────────────────────────\n"
+            f"────────────────────\n" # придумать что-то с UI под телефон
             f"<b>Текст поста:</b>\n\n"
             f"{data.post.text}\n"
-            f"────────────────────────\n"
+            f"────────────────────\n" # придумать что-то с UI под телефон
             f"📁 <b>Прикрепленный контент:</b> \n{media_status}"
         ),
         "texts": inline_texts,
