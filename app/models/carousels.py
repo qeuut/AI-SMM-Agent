@@ -32,12 +32,14 @@ class CarouselResponse:
 
         draft_dict = row["draft_json"]
 
-        if isinstance(draft_dict, dict):
-            logger.debug("Draft_dict принадлежит dict")
+        try:
+            draft_dict = dict(draft_dict)
             post_text = draft_dict.get("text", "Текст поста отсутствует")
             selected_media_ids = draft_dict.get("selected_media_ids", [])
-        else:
-            logger.debug("Draft_dict не принадлежит dict")
+            logger.debug("draft_dict успешно преобразован в dict")
+
+        except TypeError as e:
+            logger.debug(f"draft_dict не получилось преобразовать в dict. Type: {draft_dict.__class__}")
             selected_media_ids = []
             post_text = "Черновик пуст"
 
