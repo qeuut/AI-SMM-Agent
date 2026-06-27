@@ -39,18 +39,18 @@ async def get_all_posts(user_id: int) -> ReturnedPostStat | None:
     if not rows:
         return None
 
-    # счетчики и переменные для дат за один проход цикла
+    # счетчики и переменные для дат
     quantity_scheduled = 0
     quantity_published = 0
     last_scheduled_post_date = None
     last_published_post_date = None
 
     for row in rows:
-        if row["scheduled_at"]:
+        if row["status"] == "scheduled":
             quantity_scheduled += 1
             last_scheduled_post_date = row["scheduled_at"]
 
-        if row["published_at"]:
+        if row["status"] == "published":
             quantity_published += 1
             last_published_post_date = row["published_at"]
 

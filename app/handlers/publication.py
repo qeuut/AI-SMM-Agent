@@ -1,6 +1,7 @@
 # Стандартные библиотеки
 import logging
 import json
+from asyncio import gather
 
 # Сторонние библиотеки
 from aiogram import Router, F, Bot
@@ -246,6 +247,7 @@ async def queue_posts(callback: CallbackQuery, state: FSMContext) -> None:
                                                                      callbacks=["create_post", "publication"]),
                                          parse_mode="HTML")
         return
+
 
     answer_dictory = get_carousel_page_preview(data=carousel_data) # -> {"final_text": "", texts: [], callbacks: []}
     await callback.message.edit_text(answer_dictory["final_text"],

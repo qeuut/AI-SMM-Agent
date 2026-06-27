@@ -30,12 +30,12 @@ def get_carousel_page_preview(data: CarouselResponse) -> dict:
     callback_data_forward = f"carousel_post_{data.post.status}_{data.current_page+1}"
 
     if data.current_page == 1:
-        text_back = "· "
-        callback_data_back = "-,-"
+        text_back = "-"
+        callback_data_back = "-"
 
     if data.current_page == data.total_count or data.total_count == 0:
-        text_forward = " ·"
-        callback_data_forward = "-/-"
+        text_forward = "-"
+        callback_data_forward = "-"
 
     inline_texts = [
         text_back,
@@ -59,7 +59,7 @@ def get_carousel_page_preview(data: CarouselResponse) -> dict:
         "final_text": (
             f"📋 <b>Просмотр публикации [ {data.current_page} из {data.total_count} ]</b>\n\n"
             f"🔹 <b>Статус:</b> {status_text}\n"
-            f"📅 <b>Дата публикации:</b> {data.post.date}\n"
+            f"📅 <b>Дата публикации:</b> {data.post.date} (МСК)\n"
             f"🆔 <b>ID Поста:</b> <code>#{data.post.post_id}</code>\n"
             f"────────────────────\n" # придумать что-то с UI под телефон
             f"<b>Текст поста:</b>\n\n"

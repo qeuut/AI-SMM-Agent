@@ -39,9 +39,6 @@ async def check_and_publish(bot: Bot) -> None:
             text = post_data.get("text", "")
             selected_media_ids = post_data.get("selected_media_ids", [])
 
-            # publish_to_channel ожидает draft_object с полями media и selected_media_ids
-            # но у нас в БД только selected_media_ids без оригинальных file_id объектов
-            # поэтому передаём упрощённый объект
             draft_object = {
                 "media": [{"file_id": fid, "type": "photo"} for fid in selected_media_ids],
                 "selected_media_ids": selected_media_ids
@@ -59,7 +56,7 @@ async def check_and_publish(bot: Bot) -> None:
                 (datetime.now(ZoneInfo("Europe/Moscow")).strftime("%Y-%m-%d %H:%M:%S"), row["post_id"])
             )
             await db.commit()
-            logger.info("Пост был успешно опубликован в канал") # Добавить маркеры для поста по типу ID, времени, общей темы (по типу пост про пляж с ID: 123, время публикации 12:00)
+            logger.info("Пост был успешно опубликован в канал") # Добавить маркеры для поста по типу ID, времени, общей темы (пост про, ИИ в СРМ системах 2026 года, ID: 123, время публикации 12:00)
 
         except Exception as e:
             logger.error(f"Ошибка публикации scheduled поста {row['post_id']}: {e}", exc_info=True)

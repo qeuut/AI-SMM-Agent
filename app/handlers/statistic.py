@@ -65,7 +65,7 @@ async def show_statistics(callback: CallbackQuery):
     )
 
     text = (
-        "<b>📊 Статистика каналов</b>\n\n"
+        "<b>📊 Статистика канала</b>\n\n"
         "В этом разделе вы можете оценить эффективность вашего контента, "
         "посмотреть охваты и получить персональные советы от искусственного "
         "интеллекта по улучшению показателей.\n\n"
@@ -82,7 +82,6 @@ async def show_statistics(callback: CallbackQuery):
         f"- Последний вышедший: <code>{published_date}</code>\n\n"
     )
 
-    # Отправляем сообщение админу (здесь же можно прикрепить инлайн-кнопки)
     await callback.message.edit_text(text, parse_mode="HTML", reply_markup=back_to())
 
     # await callback.message.edit_text(text=text,
