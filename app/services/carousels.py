@@ -36,7 +36,6 @@ def get_carousel_page_preview(data: CarouselResponse) -> dict:
         text_back,
         f"{data.current_page} / {data.total_count}",
         text_forward,
-        "DEBUG: ✏️ Редактировать пост",
         "DEBUG: ❌ Удалить пост",
         "⬅️ Вернуться в меню публикаций"
     ]
@@ -45,8 +44,7 @@ def get_carousel_page_preview(data: CarouselResponse) -> dict:
         callback_data_back,
         "-",
         callback_data_forward,
-        "1",
-        "2",
+        "-",
         "publication"
     ]
 

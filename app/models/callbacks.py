@@ -92,7 +92,7 @@ class CallbacksPublication(str, Enum):
     PUBLISHED_POST = "published_posts"
     YES_ANSWER = "yes_answer"
     CANCEL_POST_SCHEDULING = "cancel_post_scheduling"
-    CANCEL_POST_SCHEDULING_BACK = "cancel_post_scheduling_back"
+    CANCEL_POST_SCHEDULING_YES_ANSWER = "cancel_post_scheduling_yes_answer"
     CAROUSEL_POST_SCHEDULED_AT_PREFIX = "carousel_post_scheduled_at"
 
 class CallbacksSettings(str, Enum):

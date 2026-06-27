@@ -189,7 +189,7 @@ async def question_about_cancel_scheduling_post(callback: CallbackQuery, state: 
                                   reply_markup=y_or_n_for_cancel_post())
 
 
-@publication_router.callback_query(F.data == CallbacksPublication.CANCEL_POST_SCHEDULING_BACK)
+@publication_router.callback_query(F.data == CallbacksPublication.CANCEL_POST_SCHEDULING_YES_ANSWER)
 async def cancel_scheduling_post(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     post_id = data.get("post_id")
@@ -262,3 +262,8 @@ async def check_published_posts(callback: CallbackQuery):
         "DEBUG: тут можно будет посмотреть опубликованные посты (список со статистикой)",
         reply_markup=back_to(text="⬅️ Вернуться в меню публикаций", callback_data="publication")
     )
+
+
+@publication_router.callback_query(F.data == "-") # временное решение
+async def remove_the_callback(callback: CallbackQuery): # временное решение
+    pass # временное решение

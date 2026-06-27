@@ -109,11 +109,11 @@ def y_or_n_for_sync_post(callbacks: list[str]):
 
 def cancel_or_back():
     return create_buttons(texts=["❌ Отменить публикацию", "⬅️ Вернуться в главное меню"],
-                          callbacks=["cancel_post_scheduling", "MainMenu"]) # доделать отмену публикации (с предварительным вопросом перед отменой)
+                          callbacks=["cancel_post_scheduling", "MainMenu"])
 
 def y_or_n_for_cancel_post():
     return create_buttons(texts=["✅ Да, отменить", "❌ Нет, в главное меню"],
-                          callbacks=["cancel_post_scheduling_back", "MainMenu"]) # доделать отмену публикации (с предварительным вопросом перед отменой)
+                          callbacks=["cancel_post_scheduling_yes_answer", "MainMenu"])
 
 def create_post_or_back():
     return create_buttons(texts=["✨ Создать пост", "⬅️ Вернуться в меню публикаций"],
