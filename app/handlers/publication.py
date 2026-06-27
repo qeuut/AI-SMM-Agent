@@ -251,7 +251,7 @@ async def queue_posts(callback: CallbackQuery, state: FSMContext) -> None:
     await callback.message.edit_text(answer_dictory["final_text"],
                                      reply_markup=create_buttons(texts=answer_dictory["texts"],
                                                                  callbacks=answer_dictory["callbacks"],
-                                                                 net=[3,2,1]),
+                                                                 net=[3,1,1]),
                                      parse_mode="HTML")
 
 
