@@ -1,5 +1,6 @@
-from dataclasses import dataclass, field
+import json
 import logging
+from dataclasses import dataclass, field
 
 
 logger = logging.getLogger(__name__)
@@ -33,7 +34,8 @@ class CarouselResponse:
         draft_dict = row["draft_json"]
 
         try:
-            draft_dict = dict(draft_dict)
+            # draft_dict = dict(draft_dict)
+            draft_dict = json.loads(draft_dict)
             post_text = draft_dict.get("text", "Текст поста отсутствует")
             selected_media_ids = draft_dict.get("selected_media_ids", [])
             logger.debug("draft_dict успешно преобразован в dict")
