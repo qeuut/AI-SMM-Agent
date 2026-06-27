@@ -1,5 +1,8 @@
 from dataclasses import dataclass, field
-from typing import Any
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -20,7 +23,7 @@ class CarouselResponse:
     post: CarouselPostData
 
     @staticmethod
-    def parse_row_to_post(row: Any) -> CarouselPostData:
+    def parse_row_to_post(row: any) -> CarouselPostData:
         display_date = (
                 row["scheduled_at"]
                 or row["published_at"]
@@ -30,12 +33,15 @@ class CarouselResponse:
         draft_dict = row["draft_json"]
 
         if isinstance(draft_dict, dict):
+            logger.debug("Draft_dict принадлежит dict")
             post_text = draft_dict.get("text", "Текст поста отсутствует")
             selected_media_ids = draft_dict.get("selected_media_ids", [])
         else:
+            logger.debug("Draft_dict не принадлежит dict")
             selected_media_ids = []
             post_text = "Черновик пуст"
 
+        logger.debug(f"был получен draft_dict: {draft_dict}")
         msg_ids = row["channel_message_ids"]
         published_msg_ids = str(msg_ids) if msg_ids else ""
 

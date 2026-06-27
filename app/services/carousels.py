@@ -60,7 +60,7 @@ def get_carousel_page_preview(data: CarouselResponse) -> dict:
             f"<b>Текст поста:</b>\n\n"
             f"{data.post.text}\n"
             f"────────────────────────\n"
-            f"📁 <b>Прикрепленный контент:</b> {media_status}"
+            f"📁 <b>Прикрепленный контент:</b> \n{media_status}"
         ),
         "texts": inline_texts,
         "callbacks": inline_callbacks

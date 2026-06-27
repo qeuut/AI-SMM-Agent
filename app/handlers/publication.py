@@ -250,7 +250,9 @@ async def queue_posts(callback: CallbackQuery, state: FSMContext) -> None:
     answer_dictory = get_carousel_page_preview(data=carousel_data) # -> {"final_text": "", inline_buttons: {}}
     await callback.message.edit_text(answer_dictory["final_text"],
                                      reply_markup=create_buttons(texts=answer_dictory["texts"],
-                                                                 callbacks=answer_dictory["callbacks"]))
+                                                                 callbacks=answer_dictory["callbacks"],
+                                                                 net=[3,2,1]),
+                                     parse_mode="HTML")
 
 
 @publication_router.callback_query(F.data == CallbacksPublication.PUBLISHED_POST)
