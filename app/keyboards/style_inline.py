@@ -64,11 +64,11 @@ CATEGORY_LABELS = {
     "emoji": "😊 Эмодзи",
     "length": "📏 Длина постов",
     "hashtags": "#️⃣ Хештеги",
-    "cta": "📢 Призыв к действию (CTA)",
+    "cta": "📢 Призыв (CTA)",
     "formality": "👔 Формальность",
     "brand_character": "🎭 Характер бренда",
     "banned": "🚫 Запрещённые темы",
-    "addressing": "💬 Обращение к аудитории"
+    "addressing": "💬 Тип обращения"
 }
 
 

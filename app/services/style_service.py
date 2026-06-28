@@ -1,7 +1,3 @@
-from AI_SMM_AGENT.app.keyboards import back_to
-from AI_SMM_AGENT.app.keyboards.style_inline import creating_style_buttons
-from AI_SMM_AGENT.app.services.saved_style import set_style
-from aiogram.types import InlineKeyboardMarkup
 from AI_SMM_AGENT.app.services.saved_style import get_style
 from AI_SMM_AGENT.app.keyboards.style_inline import CATEGORY_LABELS, STYLE_TRANSLATIONS
 from AI_SMM_AGENT.app.UI.style import texts_for_messages
@@ -9,8 +5,6 @@ import logging
 
 
 logger = logging.getLogger(__name__)
-
-
 
 
 async def build_style_menu_text(user_id: int, changed_now: str = ""):

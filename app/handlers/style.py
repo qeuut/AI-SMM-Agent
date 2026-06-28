@@ -88,15 +88,15 @@ async def select_style(callback: CallbackQuery, state: FSMContext) -> None:
 
 @style_router.callback_query(lambda c: CallbackFilters.is_style(data=c.data))
 async def processing_style(callback: CallbackQuery, state: FSMContext) -> None: 
-    logger.info(f"DEBUG: состояние: {state}")
+    logger.debug(f"состояние: {state}")
     category, value = callback.data.split("_", 1)
 
     await set_style(callback.from_user.id, category, value)
     buttons, text = get_buttons_and_text(group_buttons=category, value=value)
 
     # на случай если пользователь нажал на ту кнопку где уже была галочка
-    with suppress(TelegramBadRequest): # ------------------------------------------------------------ костыль, исправить
-        await callback.message.edit_text(text=text, reply_markup=buttons) # ------------------------- костыль, исправить
+    with suppress(TelegramBadRequest):
+        await callback.message.edit_text(text=text, reply_markup=buttons)
 
     await callback.answer("Стиль сохранен... Возвращаю назад")
 
@@ -104,7 +104,7 @@ async def processing_style(callback: CallbackQuery, state: FSMContext) -> None:
     final_text = await build_style_menu_text(user_id=callback.from_user.id, changed_now=category) # , changed_now=style
     buttons, _ = get_buttons_and_text(group_buttons="cat")
 
-    await asyncio.sleep(1)
+    await asyncio.sleep(0.6)
     await callback.message.edit_text(text=final_text, reply_markup=buttons, parse_mode="HTML")
 
 
