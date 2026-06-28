@@ -48,8 +48,15 @@ TEXT_QUEUE_IS_NONE = (
 )
 
 PUBLISHED_IS_NONE = (
-    ""
+    "✅ *Опубликованные посты*\n\n"
+    "В системе пока нет истории успешно отправленных публикаций.\n\n"
+    "*Как посмотреть или проверить публикации:*\n"
+    "» Перейдите в раздел ✨ *Создать пост*, чтобы выпустить новый материал;\n"
+    "» После успешной отправки пост автоматически появится в этом списке;\n"
+    "» Вы сможете отслеживать статус и время выхода каждого материала.\n\n"
+    "Выпустите свой первый материал прямо сейчас, чтобы начать вести историю публикаций."
 )
+
 
 TEXT_NO_ACTIVE_POST = (
     "<b>📅 Планирование публикаций</b>\n\n"
@@ -283,7 +290,7 @@ async def check_published_posts(callback: CallbackQuery, state: FSMContext):
     if carousel_data.post.post_id == 0 and carousel_data.post.status == "error":
         logger.info(f"Функция ---queue_posts--- пост для {user_id} не найден ")
         await callback.message.edit_text(
-            text="-",
+            text=PUBLISHED_IS_NONE,
             reply_markup=create_buttons(
                 texts=["✨ Создать пост","⬅️ Вернуться в меню публикаций"],
                 callbacks=["create_post", "publication"]),
