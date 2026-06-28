@@ -1,7 +1,6 @@
 # Стандартные библиотеки
 import logging
 import json
-from asyncio import gather
 
 # Сторонние библиотеки
 from aiogram import Router, F, Bot
@@ -37,33 +36,49 @@ publication_router = Router()
 logger = logging.getLogger(__name__)
 
 
+TEXT_QUEUE_IS_NONE = (
+    "<b>📋 Очередь публикаций</b>\n\n"
+
+    "В вашем контент-плане пока нет запланированных постов.\n\n"
+
+    "<blockquote>Все созданные вами публикации, которые ожидают отправки по таймеру, "
+    "будут отображаться в этом разделе в виде удобного списка с датой и временем.</blockquote>\n\n"
+
+    "<i>Хотите заполнить очередь контентом? Начните генерацию нового материала прямо сейчас.</i>"
+)
+
+PUBLISHED_IS_NONE = (
+    ""
+)
+
+TEXT_NO_ACTIVE_POST = (
+    "<b>📅 Планирование публикаций</b>\n\n"
+
+    "В системе пока нет активного черновика для отправки.\n\n"
+
+    "<b>Как запланировать пост по таймеру:</b>\n"
+    "» Нажмите на кнопку <b>✨ Создать пост</b> ниже и отправьте материалы;\n"
+    "» Дождитесь создания готового текста системой;\n"
+    "» Нажмите кнопку «Запланировать» под результатом и напишите время.\n\n"
+
+    "<i>Создайте свой первый материал прямо сейчас, чтобы поставить его в контент-очередь.</i>"
+)
+
+PUBLICATION_MANAGEMENT = (
+    "<b>🗂️ Управление публикациями</b>\n\n"
+    "Здесь вы можете отслеживать статус ваших постов, планировать "
+    "выход нового контента на будущее или просматривать историю "
+    "уже опубликованных записей.\n\n"
+)
+
 @publication_router.callback_query(F.data == CallbacksPublication.PUBLICATION)
 async def publication(callback: CallbackQuery) -> None:
     logger.info(f"Пользователь {callback.from_user.id} открыл раздел публикаций")
-    text = (
-        "<b>🗂️ Управление публикациями</b>\n\n"
-        "Здесь вы можете отслеживать статус ваших постов, планировать "
-        "выход нового контента на будущее или просматривать историю "
-        "уже опубликованных записей.\n\n"
-    )
-    await callback.message.edit_text(text=text, reply_markup=publication_main(), parse_mode="HTML")
+    await callback.message.edit_text(text=PUBLICATION_MANAGEMENT, reply_markup=publication_main(), parse_mode="HTML")
 
 
 @publication_router.callback_query(F.data == CallbacksPublication.SCHEDULED_POST)
 async def cmd_schedule_post(callback: CallbackQuery, state: FSMContext, bot: Bot):
-    text_no_active_post = (
-        "<b>📅 Планирование публикаций</b>\n\n"
-
-        "В системе пока нет активного черновика для отправки.\n\n"
-
-        "<b>Как запланировать пост по таймеру:</b>\n"
-        "» Нажмите на кнопку <b>✨ Создать пост</b> ниже и отправьте материалы;\n"
-        "» Дождитесь создания готового текста системой;\n"
-        "» Нажмите кнопку «Запланировать» под результатом и напишите время.\n\n"
-
-        "<i>Создайте свой первый материал прямо сейчас, чтобы поставить его в контент-очередь.</i>"
-    )
-
     logger.info(f"Пользователь {callback.from_user.id} нажал 'Запланировать'")
     data = await state.get_data()
     generated_text = data.get("generated_text")
@@ -84,7 +99,7 @@ async def cmd_schedule_post(callback: CallbackQuery, state: FSMContext, bot: Bot
     else:
         logger.warning(f"Пользователь {callback.from_user.id} — активный пост не найден в FSM")
         await callback.message.edit_text(
-            text=text_no_active_post,
+            text=TEXT_NO_ACTIVE_POST,
             reply_markup=create_post_or_back(),
             parse_mode="HTML"
         )
@@ -210,60 +225,77 @@ async def cancel_scheduling_post(callback: CallbackQuery, state: FSMContext):
         (F.data == CallbacksPublication.QUEUE_PUBLICATION) |
         (F.data.startswith(CallbacksPublication.CAROUSEL_POST_SCHEDULED_PREFIX)))
 async def queue_posts(callback: CallbackQuery, state: FSMContext) -> None:
-    text_queue_is_none = (
-        "<b>📋 Очередь публикаций</b>\n\n"
-    
-        "В вашем контент-плане пока нет запланированных постов.\n\n"
-    
-        "<blockquote>Все созданные вами публикации, которые ожидают отправки по таймеру, "
-        "будут отображаться в этом разделе в виде удобного списка с датой и временем.</blockquote>\n\n"
-    
-        "<i>Хотите заполнить очередь контентом? Начните генерацию нового материала прямо сейчас.</i>"
-    )
-
+    user_id = callback.from_user.id
     if callback.data.startswith(CallbacksPublication.CAROUSEL_POST_SCHEDULED_PREFIX):
         current_page = int(callback.data.split("_")[-1])
-        await state.update_data(current_page=current_page)
+        await state.update_data(current_page_schedule=current_page)
 
     else:
         data = await state.get_data()
         current_page = data.get("current_page")
         if not current_page:
-            await state.update_data(current_page=1)
+            await state.update_data(current_page_schedule=1)
             current_page = 1
 
-    logger.info(f"Пользователь {callback.from_user.id} открыл очередь публикаций, страница {current_page}")
+    logger.info(f"ID {user_id} открыл очередь публикаций, страница {current_page}")
 
-    carousel_data = await get_carousel_data_from_db(user_id=callback.from_user.id,
-                                                    current_page=current_page,
-                                                    status="scheduled") # -> CarouselResponse
+    carousel_data = await get_carousel_data_from_db(user_id=user_id, current_page=current_page, status="scheduled") # -> CarouselResponse
 
 
     if carousel_data.post.post_id == 0 and carousel_data.post.status == "error":
-        logger.info("Функция ---queue_posts--- rows - пуст")
-        await callback.message.edit_text(text=text_queue_is_none,
-                                         reply_markup=create_buttons(texts=["✨ Создать пост",
-                                                                            "⬅️ Вернуться в меню публикаций"],
-                                                                     callbacks=["create_post", "publication"]),
-                                         parse_mode="HTML")
+        logger.info(f"Функция ---queue_posts--- пост для {user_id} не найден ")
+        await callback.message.edit_text(
+            text=TEXT_QUEUE_IS_NONE,
+            reply_markup=create_buttons(
+                texts=["✨ Создать пост","⬅️ Вернуться в меню публикаций"],
+                callbacks=["create_post", "publication"]),
+            parse_mode="HTML")
         return
 
 
-    answer_dictory = get_carousel_page_preview(data=carousel_data) # -> {"final_text": "", texts: [], callbacks: []}
-    await callback.message.edit_text(answer_dictory["final_text"],
-                                     reply_markup=create_buttons(texts=answer_dictory["texts"],
-                                                                 callbacks=answer_dictory["callbacks"],
+    result = get_carousel_page_preview(data=carousel_data) # -> {"final_text": "", texts: [], callbacks: []}
+    await callback.message.edit_text(result["final_text"],
+                                     reply_markup=create_buttons(texts=result["texts"],
+                                                                 callbacks=result["callbacks"],
                                                                  net=[3,1,1]),
                                      parse_mode="HTML")
 
 
-@publication_router.callback_query(F.data == CallbacksPublication.PUBLISHED_POST)
-async def check_published_posts(callback: CallbackQuery):
-    logger.info(f"Пользователь {callback.from_user.id} открыл историю опубликованных постов")
-    await callback.message.edit_text(
-        "DEBUG: тут можно будет посмотреть опубликованные посты (список со статистикой)",
-        reply_markup=back_to(text="⬅️ Вернуться в меню публикаций", callback_data="publication")
-    )
+@publication_router.callback_query(
+    (F.data == CallbacksPublication.PUBLISHED_POST) |
+    (F.data == CallbacksPublication.CAROUSEL_POST_PUBLISHED_PREFIX))
+async def check_published_posts(callback: CallbackQuery, state: FSMContext):
+    user_id = callback.from_user.id
+    if callback.data.startswith(CallbacksPublication.CAROUSEL_POST_PUBLISHED_PREFIX):
+        current_page = int(callback.data.split("_")[-1])
+        await state.update_data(current_page_schedule=current_page)
+
+    else:
+        data = await state.get_data()
+        current_page = data.get("current_page_published")
+        if not current_page:
+            await state.update_data(current_page_schedule=1)
+            current_page = 1
+
+    logger.info(f"ID {user_id} открыл очередь публикаций, страница {current_page}")
+    carousel_data = await get_carousel_data_from_db(user_id=user_id,current_page=current_page, status="published")
+
+    if carousel_data.post.post_id == 0 and carousel_data.post.status == "error":
+        logger.info(f"Функция ---queue_posts--- пост для {user_id} не найден ")
+        await callback.message.edit_text(
+            text="-",
+            reply_markup=create_buttons(
+                texts=["✨ Создать пост","⬅️ Вернуться в меню публикаций"],
+                callbacks=["create_post", "publication"]),
+            parse_mode="HTML")
+        return
+
+    result = get_carousel_page_preview(data=carousel_data) # -> {"final_text": "", texts: [], callbacks: []}
+    await callback.message.edit_text(result["final_text"],
+                                     reply_markup=create_buttons(texts=result["texts"],
+                                                                 callbacks=result["callbacks"],
+                                                                 net=[3,1,1]),
+                                     parse_mode="HTML")
 
 
 @publication_router.callback_query(F.data == "-") # временное решение
