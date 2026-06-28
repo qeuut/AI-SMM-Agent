@@ -30,25 +30,50 @@ from AI_SMM_AGENT.app.utils.states import SelectChannel
 # БД
 from AI_SMM_AGENT.app.repositories.user_info_repo import save_channel_id
 
+
 settings_router = Router()
 
 
 logger = logging.getLogger(__name__)
 
 
+SETTINGS_ABOUT_BOT = (
+    "<b>ℹ️ О боте</b>\n\n"
+
+    "<b>Your AI SMM Agent</b> — AI-система для профессиональной работы с Telegram-контентом.\n\n"
+
+    "Бот принимает ваши голосовые сообщения, наброски и медиафайлы, "
+    "помогает находить идеи, создавать пошаговые <b>контент-планы</b> "
+    "и писать готовые посты под <b>стиль вашего канала</b>.\n\n"
+
+    "<blockquote>Система объединяет несколько AI-моделей в единую рабочую цепочку.</blockquote>\n\n"
+
+    "Вместо базовых шаблонов здесь работает сеть <b>AI-агентов</b>: "
+    "одни модули извлекают главные смыслы из ваших материалов, "
+    "другие выстраивают четкую логику, а отдельные нейросети "
+    "отвечают за качество текста и вовлечение аудитории.\n\n"
+
+    "В результате вы получаете не просто автогенерацию, а глубоко проработанный SMM-контент.\n\n"
+
+    "⚙️ <i>Проект находится в активной разработке.</i>\n"
+    "Функции системы, сценарии работы и качество генерации "
+    "постепенно улучшаются и расширяются."
+)
+
+SETTINGS_MENU = (
+    "<b>⚙️ Параметры и настройки</b>\n\n"
+
+    "Управление конфигурацией профиля и параметрами работы системы.\n\n"
+
+    "В этом разделе можно:\n"
+    "<b>></b> выбрать Telegram-канал для публикации\n"
+    "<b>></b> ознакомиться с информацией о проекте\n\n"
+)
+
+
 async def settings_cmd(event: CallbackQuery | Message) -> None:
-    text = (
-        "<b>⚙️ Параметры и настройки</b>\n\n"
-
-        "Управление конфигурацией профиля и параметрами работы системы.\n\n"
-
-        "В этом разделе можно:\n"
-        "<b>></b> выбрать Telegram-канал для публикации\n"
-        "<b>></b> ознакомиться с информацией о проекте\n\n"
-    )
-
     if isinstance(event, CallbackQuery):
-        await event.message.edit_text(text=text,
+        await event.message.edit_text(text=SETTINGS_MENU,
                                       reply_markup=settings_main_btn(),
                                       parse_mode="HTML")
 
@@ -58,7 +83,7 @@ async def settings_cmd(event: CallbackQuery | Message) -> None:
         except TelegramAPIError:
             logger.warning(f"Функция ---settings_cmd---, event = {event}, ошибка во время удаления сообщения...")
 
-        await event.answer(text=text,
+        await event.answer(text=SETTINGS_MENU,
                            reply_markup=settings_main_btn(),
                            parse_mode="HTML")
 
@@ -146,29 +171,11 @@ async def handle_shared_chat(message: Message, state: FSMContext):
 
 @settings_router.callback_query(F.data == CallbacksSettings.HELP_SETTINGS)
 async def cmd_help_settings(callback: CallbackQuery) -> None:
-    text = (
-        "<b>ℹ️ О боте</b>\n\n"
-
-        "<b>Your AI SMM Agent</b> — AI-система для профессиональной работы с Telegram-контентом.\n\n"
-
-        "Бот принимает ваши голосовые сообщения, наброски и медиафайлы, "
-        "помогает находить идеи, создавать пошаговые <b>контент-планы</b> "
-        "и писать готовые посты под <b>стиль вашего канала</b>.\n\n"
-
-        "<blockquote>Система объединяет несколько AI-моделей в единую рабочую цепочку.</blockquote>\n\n"
-
-        "Вместо базовых шаблонов здесь работает сеть <b>AI-агентов</b>: "
-        "одни модули извлекают главные смыслы из ваших материалов, "
-        "другие выстраивают четкую логику, а отдельные нейросети "
-        "отвечают за качество текста и вовлечение аудитории.\n\n"
-
-        "В результате вы получаете не просто автогенерацию, а глубоко проработанный SMM-контент.\n\n"
-
-        "⚙️ <i>Проект находится в активной разработке.</i>\n"
-        "Функции системы, сценарии работы и качество генерации "
-        "постепенно улучшаются и расширяются."
-    )
-
-    await callback.message.edit_text(text=text,
+    await callback.message.edit_text(text=SETTINGS_ABOUT_BOT,
                                      reply_markup=settings_back_to(text="⬅️ Вернуться в настройки", callback="settings"),
                                      parse_mode="HTML")
+
+
+@settings_router.callback_query(F.data == CallbacksSettings.NOTIFICATIONS)
+async def notifications(callback: CallbackQuery):
+    await callback.message.edit_text("DEBUG: Функция в разработке", reply_markup=settings_back_to(callback="settings"))
