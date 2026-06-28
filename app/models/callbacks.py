@@ -101,7 +101,7 @@ class CallbacksSettings(str, Enum):
     PUBLICATION_MODE_SETTINGS = "publication_mode_settings"
     SELECT_CHANNEL_SETTINGS = "select_channel_settings"
     HELP_SETTINGS = "help_settings"
-
+    NOTIFICATIONS = "notifications"
 
 class CallbacksStatistic(str, Enum):
     STATISTICS = "statistics"

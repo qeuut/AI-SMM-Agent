@@ -12,8 +12,7 @@ from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
 # Клавиатуры
 from AI_SMM_AGENT.app.keyboards import back_to
 from AI_SMM_AGENT.app.keyboards.settings_inline import(
-    settings_main_btn, settings_select_publication_mode,
-    settings_back_to,
+    settings_main_btn, settings_select_publication_mode
 )
 from AI_SMM_AGENT.app.keyboards.reply import (
     get_change_channel_reply_keyboard, get_main_menu_reply_keyboard,
@@ -172,10 +171,12 @@ async def handle_shared_chat(message: Message, state: FSMContext):
 @settings_router.callback_query(F.data == CallbacksSettings.HELP_SETTINGS)
 async def cmd_help_settings(callback: CallbackQuery) -> None:
     await callback.message.edit_text(text=SETTINGS_ABOUT_BOT,
-                                     reply_markup=settings_back_to(text="⬅️ Вернуться в настройки", callback="settings"),
+                                     reply_markup=back_to(text="⬅️ Вернуться в меню настроек", callback_data="settings"),
                                      parse_mode="HTML")
 
 
 @settings_router.callback_query(F.data == CallbacksSettings.NOTIFICATIONS)
 async def notifications(callback: CallbackQuery):
-    await callback.message.edit_text("DEBUG: Функция в разработке", reply_markup=settings_back_to(callback="settings"))
+    await callback.message.edit_text("DEBUG: Функция в разработке", reply_markup=back_to(
+                                                                                text="⬅️ Вернуться в меню настроек",
+                                                                                callback_data="settings"))

@@ -11,8 +11,9 @@ logger = logging.getLogger(__name__)
 
 def settings_main_btn():
     return create_buttons(
-        texts=["📢 Telegram-канал", "ℹ️ О боте / Помощь", "⬅️ Вернуться в главное меню"],
-        callbacks=["select_channel_settings", "help_settings", "MainMenu"]
+        texts=["📢 Telegram-канал", "ℹ️ О боте / Помощь", "🔔 Уведомления", "⬅️ Вернуться в главное меню"], # Уведомления: Включены
+        callbacks=["select_channel_settings", "help_settings", "notifications", "MainMenu"],
+        net=[2,1,1]
     )
 
 
@@ -20,16 +21,4 @@ def settings_select_publication_mode():
     return create_buttons(
         texts=["DEBUG скоро тут появятся режимы", "DEBUG скоро тут появятся режимы", "⬅️ Вернуться в настройки"],
         callbacks=["None", "None", "settings"]
-    )
-
-
-def settings_back_to(text: str = "⬅️ Вернуться назад", callback: str | None = None):
-    if not callback:
-        callback = "settings"
-        logger.error("Функция settings_back_to, не был передан аргумент callback, callback был взят как 'settings'")
-        return
-
-    return create_buttons(
-        texts=[text],
-        callbacks=[callback]
     )
