@@ -18,6 +18,9 @@ from AI_SMM_AGENT.app.models.callbacks import CallbacksNavigation, CallbacksStyl
 # репозитории, сервисы
 from AI_SMM_AGENT.app.repositories.sessionID_repo import get_or_create_session
 
+# Текста
+from AI_SMM_AGENT.texts.navigation_text import MAIN_TEXT
+
 # модели
 ...
 
@@ -32,18 +35,10 @@ logger = logging.getLogger(__name__)
 
 
 async def cmd_start(message: Message, state: FSMContext, edit: bool = False) -> Message | None:
-    text = (
-        "<b>👋 Приветствую! Я ваш персональный AI-SMM ассистент.</b>\n\n"
-        "Я помогаю автоматизировать рутину в Telegram: переведу ваши "
-        "видео в готовые тексты, подготовлю контент-план и адаптирую "
-        "подачу под стиль вашего канала.\n\n"
-        "Давайте начнем. Выберите нужное действие в меню ниже:"
-    )
-
     if edit:
         await state.clear()
         logger.info(f"Состояние для {message.from_user.id} было очищено")
-        await message.edit_text(text=text, reply_markup=main_menu(), parse_mode="HTML")
+        await message.edit_text(text=MAIN_TEXT, reply_markup=main_menu(), parse_mode="HTML")
         return None
 
     data = await state.get_data()
@@ -58,7 +53,7 @@ async def cmd_start(message: Message, state: FSMContext, edit: bool = False) -> 
 
     logger.debug(f"reply_keyboard_status = {reply_keyboard_status}")
 
-    await message.answer(text=text, reply_markup=main_menu(), parse_mode="HTML")
+    await message.answer(text=MAIN_TEXT, reply_markup=main_menu(), parse_mode="HTML")
     await get_or_create_session(user_id=message.from_user.id)
 
 
