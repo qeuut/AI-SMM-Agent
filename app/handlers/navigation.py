@@ -19,7 +19,7 @@ from AI_SMM_AGENT.app.models.callbacks import CallbacksNavigation, CallbacksStyl
 from AI_SMM_AGENT.app.repositories.sessionID_repo import get_or_create_session
 
 # Текста
-from AI_SMM_AGENT.texts.navigation_text import MAIN_TEXT
+from AI_SMM_AGENT.texts.navigation_text import MAIN_MENU_TEXT
 
 # модели
 ...
@@ -38,7 +38,7 @@ async def cmd_start(message: Message, state: FSMContext, edit: bool = False) -> 
     if edit:
         await state.clear()
         logger.info(f"Состояние для {message.from_user.id} было очищено")
-        await message.edit_text(text=MAIN_TEXT, reply_markup=main_menu(), parse_mode="HTML")
+        await message.edit_text(text=MAIN_MENU_TEXT, reply_markup=main_menu(), parse_mode="HTML")
         return None
 
     data = await state.get_data()
@@ -53,7 +53,7 @@ async def cmd_start(message: Message, state: FSMContext, edit: bool = False) -> 
 
     logger.debug(f"reply_keyboard_status = {reply_keyboard_status}")
 
-    await message.answer(text=MAIN_TEXT, reply_markup=main_menu(), parse_mode="HTML")
+    await message.answer(text=MAIN_MENU_TEXT, reply_markup=main_menu(), parse_mode="HTML")
     await get_or_create_session(user_id=message.from_user.id)
 
 
