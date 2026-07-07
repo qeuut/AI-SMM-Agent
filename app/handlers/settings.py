@@ -4,7 +4,7 @@ from contextlib import suppress
 
 
 # Сторонние библиотеки
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.exceptions import TelegramAPIError
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
@@ -28,6 +28,10 @@ from AI_SMM_AGENT.app.utils.states import SelectChannel
 
 # БД
 from AI_SMM_AGENT.app.repositories.user_info_repo import save_channel_id
+
+
+# utils
+from AI_SMM_AGENT.app.utils.telegram_helpers import build_channel_changed_text
 
 
 settings_router = Router()
@@ -106,20 +110,12 @@ async def calling_setting_cmd_by_reply(message: Message, state: FSMContext):
     await state.update_data(reply_keyboard_status=False)
 
 
-# @settings_router.callback_query(F.data == CallbacksSettings.PUBLICATION_MODE_SETTINGS)
-# async def cmd_publication_mode_settings(callback: CallbackQuery) -> None:
-#     await callback.message.edit_text(text="<b>🤖 Режим публикации</b>",
-#                                      reply_markup=settings_select_publication_mode(),
-#                                      parse_mode="HTML")
-
-
 @settings_router.callback_query(F.data == CallbacksSettings.SELECT_CHANNEL_SETTINGS)
 async def cmd_select_channel_settings(callback: CallbackQuery, state: FSMContext) -> None:
     try:
         await callback.message.delete() # Удаляем последнее и шлем новое т.к., reply кнопку нельзя делать вместе с edit_text
     except TelegramAPIError:
         logger.error(f"Функция ---cmd_select_channel_settings--- ошибка во время удаления сообщения с ID {callback.message.message_id}")
-
 
     sent = await callback.message.answer(text="<b>📢 Выбор канала</b>\n\n"
                                               "В меню ниже: после нажатия на кнопку выберете нужный вам канал",
@@ -131,42 +127,23 @@ async def cmd_select_channel_settings(callback: CallbackQuery, state: FSMContext
 
 
 @settings_router.message(F.chat_shared)
-async def handle_shared_chat(message: Message, state: FSMContext):
+async def handle_shared_chat(message: Message, state: FSMContext, bot: Bot):
     # Вытаскиваем ID и название канала, который выбрал пользователь
     new_channel_id = message.chat_shared.chat_id
 
-    try:
-        chat_info = await message.bot.get_chat(new_channel_id)
-        channel_title = chat_info.title
-        channel_username = f"@{chat_info.username}" if chat_info.username else "Приватный"
-        channel_username_status = bool(chat_info.username)
-
-    except TelegramAPIError:
-        channel_title = "Выбранный канал"
-        channel_username = "Приватный"
-        channel_username_status = False
-
+    final_text = await build_channel_changed_text(bot=bot, new_channel_id=new_channel_id)
     await save_channel_id(user_id=message.from_user.id, channel_id=new_channel_id)
-
-    text = (
-        "<b>✅ Канал успешно изменен!</b>\n\n"
-        f"> Название: <code>{channel_title}</code>\n"
-        f"{f'> Ссылка: <b>{channel_username}</b>' if channel_username_status else '> Ссылка: <code>канал приватный</code>'}\n"
-        f"> ID: <code>{new_channel_id}</code>\n\n"
-        "<i>⚠️ Не забудьте добавить бота в этот канал администратором, чтобы он мог публиковать посты.</i>"
-    )
 
     # Возвращаем пользователя в меню статистики или главное меню
     data = await state.get_data()
     mssg_id = data.get("select_channel_mssg_id")
 
     try:
-        await message.bot.delete_message(message.chat.id, mssg_id)
+        await bot.delete_message(message.chat.id, mssg_id)
     except TelegramAPIError:
-        logger.error(f"Функция ---handle_shared_chat--- ошибка во время удаления сообщения с ID: {mssg_id}")
+        logger.error(f"Ошибка во время удаления сообщения с ID: {mssg_id}")
 
-
-    await message.answer(text, parse_mode="HTML", reply_markup=get_main_menu_reply_keyboard())
+    await message.answer(final_text, parse_mode="HTML", reply_markup=get_main_menu_reply_keyboard())
     await state.update_data(reply_keyboard_status=True)
 
 @settings_router.callback_query(F.data == CallbacksSettings.HELP_SETTINGS)
