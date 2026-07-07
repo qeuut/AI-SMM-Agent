@@ -7,12 +7,12 @@ from contextlib import suppress
 from aiogram import Router, F, Bot
 from aiogram.exceptions import TelegramAPIError
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
+from aiogram.types import CallbackQuery, Message
 
 # Клавиатуры
 from AI_SMM_AGENT.app.keyboards import back_to
 from AI_SMM_AGENT.app.keyboards.settings_inline import(
-    settings_main_btn, settings_select_publication_mode
+    settings_main_btn
 )
 from AI_SMM_AGENT.app.keyboards.reply import (
     get_change_channel_reply_keyboard, get_main_menu_reply_keyboard,
@@ -31,48 +31,16 @@ from AI_SMM_AGENT.app.repositories.user_info_repo import save_channel_id
 
 
 # utils
-from AI_SMM_AGENT.app.utils.telegram_helpers import changed_channel_text
+from AI_SMM_AGENT.app.utils.telegram_helpers import create_channel_changed_text
+
+# texts
+from AI_SMM_AGENT.texts.settings_texts import SETTINGS_ABOUT_BOT, SETTINGS_MENU
 
 
 settings_router = Router()
 
 
 logger = logging.getLogger(__name__)
-
-
-SETTINGS_ABOUT_BOT = (
-    "<b>ℹ️ О боте</b>\n\n"
-
-    "<b>Your AI SMM Agent</b> — AI-система для профессиональной работы с Telegram-контентом.\n\n"
-
-    "Бот принимает ваши голосовые сообщения, наброски и медиафайлы, "
-    "помогает находить идеи, создавать пошаговые <b>контент-планы</b> "
-    "и писать готовые посты под <b>стиль вашего канала</b>.\n\n"
-
-    "<blockquote>Система объединяет несколько AI-моделей в единую рабочую цепочку.</blockquote>\n\n"
-
-    "Вместо базовых шаблонов здесь работает сеть <b>AI-агентов</b>: "
-    "одни модули извлекают главные смыслы из ваших материалов, "
-    "другие выстраивают четкую логику, а отдельные нейросети "
-    "отвечают за качество текста и вовлечение аудитории.\n\n"
-
-    "В результате вы получаете не просто автогенерацию, а глубоко проработанный SMM-контент.\n\n"
-
-    "⚙️ <i>Проект находится в активной разработке.</i>\n"
-    "Функции системы, сценарии работы и качество генерации "
-    "постепенно улучшаются и расширяются."
-)
-
-SETTINGS_MENU = (
-    "⚙️ <b>Параметры и настройки</b>\n\n"
-    "Управление конфигурацией вашего профиля, уведомлениями и интеграциями.\n\n"
-    "<b>В этом разделе можно:</b>\n"
-    "» Подключить или изменить целевой <b>Telegram-канал</b>;\n"
-    "» Настроить системные <b>уведомления</b> бота;\n"
-    "» Ознакомиться со справочной <b>информацией о проекте</b>.\n\n"
-    "<i>Выберите необходимый пункт на кнопках ниже.</i>"
-)
-
 
 
 async def settings_cmd(event: CallbackQuery | Message) -> None:
@@ -131,7 +99,7 @@ async def handle_shared_chat(message: Message, state: FSMContext, bot: Bot):
     # Вытаскиваем ID и название канала, который выбрал пользователь
     new_channel_id = message.chat_shared.chat_id
 
-    final_text = await changed_channel_text(bot=bot, new_channel_id=new_channel_id)
+    final_text = await create_channel_changed_text(bot=bot, new_channel_id=new_channel_id)
     await save_channel_id(user_id=message.from_user.id, channel_id=new_channel_id)
 
     # Возвращаем пользователя в меню статистики или главное меню

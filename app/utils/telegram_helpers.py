@@ -26,7 +26,7 @@ async def clean_reply_keyboard_if_present(data: dict,message: Message) -> None:
         logger.error(f"---clean_reply_keyboard--- Ошибка удаления сообщения {text} на стороне телеграм: {e}")
 
 
-async def changed_channel_text(bot: Bot, new_channel_id) -> str:
+async def create_channel_changed_text(bot: Bot, new_channel_id) -> str:
     try:
         chat_info = await bot.get_chat(new_channel_id)
         channel_title = chat_info.title
