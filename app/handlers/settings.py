@@ -31,7 +31,7 @@ from AI_SMM_AGENT.app.repositories.user_info_repo import save_channel_id
 
 
 # utils
-from AI_SMM_AGENT.app.utils.telegram_helpers import build_channel_changed_text
+from AI_SMM_AGENT.app.utils.telegram_helpers import changed_channel_text
 
 
 settings_router = Router()
@@ -131,7 +131,7 @@ async def handle_shared_chat(message: Message, state: FSMContext, bot: Bot):
     # Вытаскиваем ID и название канала, который выбрал пользователь
     new_channel_id = message.chat_shared.chat_id
 
-    final_text = await build_channel_changed_text(bot=bot, new_channel_id=new_channel_id)
+    final_text = await changed_channel_text(bot=bot, new_channel_id=new_channel_id)
     await save_channel_id(user_id=message.from_user.id, channel_id=new_channel_id)
 
     # Возвращаем пользователя в меню статистики или главное меню

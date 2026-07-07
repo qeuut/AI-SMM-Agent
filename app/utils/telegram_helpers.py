@@ -26,7 +26,7 @@ async def clean_reply_keyboard_if_present(data: dict,message: Message) -> None:
         logger.error(f"---clean_reply_keyboard--- Ошибка удаления сообщения {text} на стороне телеграм: {e}")
 
 
-async def build_channel_changed_text(bot: Bot, new_channel_id) -> str:
+async def changed_channel_text(bot: Bot, new_channel_id) -> str:
     try:
         chat_info = await bot.get_chat(new_channel_id)
         channel_title = chat_info.title
@@ -37,16 +37,15 @@ async def build_channel_changed_text(bot: Bot, new_channel_id) -> str:
                 if channel_username_status
                 else '> Ссылка: <code>канал приватный</code>')
 
-    except TelegramAPIError:
+    except TelegramAPIError as e:
+        logger.error(f"Ошибка запроса к Telegram: {e}")
         link = "> Ссылка: <code>канал приватный</code>"
         channel_title = "Выбранный канал"
 
-    text = (
+    return (
         "<b>✅ Канал успешно изменен!</b>\n\n"
         f"> Название: <code>{channel_title}</code>\n"
         f"{link}\n"
         f"> ID: <code>{new_channel_id}</code>\n\n"
         "<i>⚠️ Не забудьте добавить бота в этот канал администратором, чтобы он мог публиковать посты.</i>"
     )
-
-    return text
