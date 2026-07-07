@@ -22,13 +22,8 @@ from AI_SMM_AGENT.app.keyboards.reply import (
 # модели
 from AI_SMM_AGENT.app.models.callbacks import CallbacksSettings
 
-
-# состояния
-from AI_SMM_AGENT.app.utils.states import SelectChannel
-
 # БД
 from AI_SMM_AGENT.app.repositories.user_info_repo import save_channel_id
-
 
 # utils
 from AI_SMM_AGENT.app.utils.telegram_helpers import create_channel_changed_text
@@ -85,7 +80,7 @@ async def cmd_select_channel_settings(callback: CallbackQuery, state: FSMContext
     except TelegramAPIError:
         logger.error(f"Функция ---cmd_select_channel_settings--- ошибка во время удаления сообщения с ID {callback.message.message_id}")
 
-    sent = await callback.message.answer(text="<b>📢 Выбор канала</b>\n\n"
+    sent = await callback.message.answer(text="<b>📢 Выбор канала</b>\n\n" # Шлем новое т.к., reply кнопку нельзя делать вместе с edit_text
                                               "В меню ниже: после нажатия на кнопку выберете нужный вам канал",
                                          reply_markup=get_change_channel_reply_keyboard(),
                                          parse_mode="HTML")
