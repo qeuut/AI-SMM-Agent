@@ -78,15 +78,16 @@ async def cmd_select_channel_settings(callback: CallbackQuery, state: FSMContext
     try:
         await callback.message.delete() # Удаляем последнее и шлем новое т.к., reply кнопку нельзя делать вместе с edit_text
     except TelegramAPIError:
-        logger.error(f"Функция ---cmd_select_channel_settings--- ошибка во время удаления сообщения с ID {callback.message.message_id}")
+        logger.error(f"Ошибка во время удаления сообщения с ID {callback.message.message_id}")
 
-    sent = await callback.message.answer(text="<b>📢 Выбор канала</b>\n\n" # Шлем новое т.к., reply кнопку нельзя делать вместе с edit_text
-                                              "В меню ниже: после нажатия на кнопку выберете нужный вам канал",
-                                         reply_markup=get_change_channel_reply_keyboard(),
-                                         parse_mode="HTML")
+    sent = await callback.message.answer(
+        text="<b>📢 Выбор канала</b>\n\n" # Шлем новое т.к., reply кнопку нельзя делать вместе с edit_text
+             "В меню ниже: после нажатия на кнопку выберете нужный вам канал",
+        reply_markup=get_change_channel_reply_keyboard(),
+        parse_mode="HTML")
 
-    await state.update_data(select_channel_mssg_id=sent.message_id)
-    await state.update_data(reply_keyboard_status=True)
+    await state.update_data(select_channel_mssg_id=sent.message_id,
+                            reply_keyboard_status=True)
 
 
 @settings_router.message(F.chat_shared)
