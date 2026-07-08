@@ -57,6 +57,8 @@ from AI_SMM_AGENT.app.utils.cleanup_media import cleanup_media_messages
 # UI Сервисы
 from AI_SMM_AGENT.app.UI_Services.send_media_post import send_post_with_media
 
+# текста
+from AI_SMM_AGENT.texts.post_texts import MAIN_TEXT
 
 posts_router = Router()
 posts_router.message.middleware(AlbumMiddleware())
@@ -65,25 +67,10 @@ posts_router.callback_query.filter(ValidCallbackFilter())
 logger = logging.getLogger(__name__)
 
 
-# ==================== ХЕНДЛЕРЫ ====================
 @posts_router.callback_query(F.data == CallbacksPost.CREATE_POST)
 async def cmd_create_post(callback: CallbackQuery, state: FSMContext, bot: Bot) -> None:
-    text = (
-        "<b>Создание публикации</b>\n\n"
-        "Отправьте в чат исходные материалы для генерации. Система автоматически распознает формат и подготовит текст.\n\n"
-        "<b>Поддерживаемые форматы:</b>\n"
-        "» <b>Текст:</b> тезисы, сырые наброски или готовая тема\n"
-        "» <b>Ссылки:</b> YouTube, Shorts, Reels, TikTok или посты из Telegram\n"
-        "» <b>Аудио:</b> голосовые сообщения и файлы (транскрибация)\n"
-        "» <b>Медиа:</b> изображения или видеоролики с описанием в подписи\n\n"
-        "<b>Примеры запросов:</b>\n"
-        "- <i>«Напиши экспертный пост про тренды SEO на основе этих тезисов...»</i>\n"
-        "- <code>https://youtube.com...</code>\n\n"
-        "<i>Пришлите файл, ссылку или текст для начала генерации...</i>"
-    )
-
     await cleanup_media_messages(bot=bot, chat_id=callback.message.chat.id, state=state)
-    await callback.message.edit_text(text=text, reply_markup=back_to(), parse_mode="HTML")
+    await callback.message.edit_text(text=MAIN_TEXT, reply_markup=back_to(), parse_mode="HTML")
     await get_or_create_session(user_id=callback.from_user.id, mode=SessionModes.SET_SESSION_ID)
     await state.set_state(CreatedPost.WaitMessForPost)
     await state.update_data(edit_mode=False, draft_post=None)

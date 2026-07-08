@@ -32,51 +32,12 @@ from AI_SMM_AGENT.app.services.carousels import get_carousel_page_preview
 from AI_SMM_AGENT.app.utils.cleanup_media import cleanup_media_messages
 from AI_SMM_AGENT.app.utils.parsing_time import parse_schedule_time
 
+# текста
+from AI_SMM_AGENT.texts.publication_texts import TEXT_QUEUE_IS_NONE, PUBLISHED_IS_NONE, TEXT_NO_ACTIVE_POST, PUBLICATION_MANAGEMENT
+
 publication_router = Router()
 logger = logging.getLogger(__name__)
 
-
-TEXT_QUEUE_IS_NONE = (
-    "<b>📋 Очередь публикаций</b>\n\n"
-
-    "В вашем контент-плане пока нет запланированных постов.\n\n"
-
-    "<blockquote>Все созданные вами публикации, которые ожидают отправки по таймеру, "
-    "будут отображаться в этом разделе в виде удобного списка с датой и временем.</blockquote>\n\n"
-
-    "<i>Хотите заполнить очередь контентом? Начните генерацию нового материала прямо сейчас.</i>"
-)
-
-PUBLISHED_IS_NONE = (
-    "✅ *Опубликованные посты*\n\n"
-    "В системе пока нет истории успешно отправленных публикаций.\n\n"
-    "*Как посмотреть или проверить публикации:*\n"
-    "» Перейдите в раздел ✨ *Создать пост*, чтобы выпустить новый материал;\n"
-    "» После успешной отправки пост автоматически появится в этом списке;\n"
-    "» Вы сможете отслеживать статус и время выхода каждого материала.\n\n"
-    "Выпустите свой первый материал прямо сейчас, чтобы начать вести историю публикаций."
-)
-
-
-TEXT_NO_ACTIVE_POST = (
-    "<b>📅 Планирование публикаций</b>\n\n"
-
-    "В системе пока нет активного черновика для отправки.\n\n"
-
-    "<b>Как запланировать пост по таймеру:</b>\n"
-    "» Нажмите на кнопку <b>✨ Создать пост</b> ниже и отправьте материалы;\n"
-    "» Дождитесь создания готового текста системой;\n"
-    "» Нажмите кнопку «Запланировать» под результатом и напишите время.\n\n"
-
-    "<i>Создайте свой первый материал прямо сейчас, чтобы поставить его в контент-очередь.</i>"
-)
-
-PUBLICATION_MANAGEMENT = (
-    "<b>🗂️ Управление публикациями</b>\n\n"
-    "Здесь вы можете отслеживать статус ваших постов, планировать "
-    "выход нового контента на будущее или просматривать историю "
-    "уже опубликованных записей.\n\n"
-)
 
 @publication_router.callback_query(F.data == CallbacksPublication.PUBLICATION)
 async def publication(callback: CallbackQuery) -> None:
@@ -288,7 +249,7 @@ async def check_published_posts(callback: CallbackQuery, state: FSMContext):
     carousel_data = await get_carousel_data_from_db(user_id=user_id,current_page=current_page, status="published")
 
     if carousel_data.post.post_id == 0 and carousel_data.post.status == "error":
-        logger.info(f"Функция ---queue_posts--- пост для {user_id} не найден ")
+        logger.info(f"Пост для {user_id} не найден ")
         await callback.message.edit_text(
             text=PUBLISHED_IS_NONE,
             reply_markup=create_buttons(
