@@ -89,12 +89,13 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
             else:
                 logger.warning(f"ID загрузочного сообщения не найден в Redis для чата {payload.chat_id}")
 
-            if payload.media_for_publish is not None: # н8н всегда возвращает список
+            if payload.media_for_publish is not None and len(payload.media_for_publish) > 0:
                 await send_post_with_media(
                     bot=bot,
                     text=payload.post,
                     photos=payload.media_for_publish,
-                    markup=pre_procedural_actions()
+                    markup=pre_procedural_actions(),
+                    chat_id=payload.chat_id
                 )
 
             elif message_id:

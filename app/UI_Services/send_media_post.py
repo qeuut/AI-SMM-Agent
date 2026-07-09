@@ -1,12 +1,8 @@
 import logging
 
-# aiogram
 from aiogram import Bot
-from aiogram.types import CallbackQuery
 from aiogram.exceptions import TelegramAPIError
 from aiogram.utils.media_group import MediaGroupBuilder
-
-# their own
 
 logger = logging.getLogger(__name__)
 
@@ -14,39 +10,30 @@ logger = logging.getLogger(__name__)
 async def send_post_with_media(
     bot: Bot,
     text: str,
-    photos: list[dict],
+    photos: list,
     markup,
+    chat_id: int,
     prefix: str = "",
-    callback: CallbackQuery | None = None,
-    media_already_sent: bool = True,
-    chat_id: int | None = None
 ) -> list[int]:
-    """Удаляет текущее сообщение и отправляет пост с медиа или без."""
+    """Отправляет пост с медиа или без, используя bot и chat_id напрямую."""
     full_text = f"{prefix}{text}" if prefix else text
     created_ids = []
 
-    try:
-        await callback.message.delete()
-    except TelegramAPIError:
-        pass
-
-    if len(photos) == 1 and not media_already_sent:
-        logger.info("Была получена 1 фотография")
+    if len(photos) == 1:
+        file_id = photos[0]
         sent_message = await bot.send_photo(
             chat_id=chat_id,
-            photo=photos[0]["file_id"],
+            photo=file_id,
             caption=full_text[:1024],
             reply_markup=markup,
             parse_mode="HTML"
         )
         created_ids.append(sent_message.message_id)
 
-    elif len(photos) > 1 and not media_already_sent:
-        logger.info("было получено более 1 фотографии")
+    elif len(photos) > 1:
         builder = MediaGroupBuilder()
-        for p in photos:
-            builder.add_photo(media=p["file_id"])
-
+        for file_id in photos:
+            builder.add_photo(media=file_id)
         media_messages = await bot.send_media_group(chat_id=chat_id, media=builder.build())
         created_ids.extend([msg.message_id for msg in media_messages])
         text_message = await bot.send_message(
@@ -57,9 +44,7 @@ async def send_post_with_media(
         )
         created_ids.append(text_message.message_id)
 
-
     else:
-        logger.info("Фотографий не было найдено")
         sent_message = await bot.send_message(
             chat_id=chat_id,
             text=full_text,
