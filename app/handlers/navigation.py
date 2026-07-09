@@ -19,7 +19,7 @@ from AI_SMM_AGENT.app.models.callbacks import CallbacksNavigation, CallbacksStyl
 from AI_SMM_AGENT.app.repositories.sessionID_repo import get_or_create_session
 
 # Текста
-from AI_SMM_AGENT.texts.navigation_text import MAIN_MENU_TEXT
+from AI_SMM_AGENT.app.texts.navigation_text import MAIN_MENU_TEXT
 
 # Помощники
 from AI_SMM_AGENT.app.utils.cleanup_media import cleanup_media_messages

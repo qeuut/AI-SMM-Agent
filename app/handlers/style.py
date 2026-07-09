@@ -37,6 +37,8 @@ from AI_SMM_AGENT.app.middlewares.callback_style_filter import CallbackFilters
 # UI
 from AI_SMM_AGENT.app.UI.style import get_buttons_and_text, texts_for_messages
 
+# текста
+from AI_SMM_AGENT.app.texts.style_texts import TEXTS_DIRECTORY
 
 style_router = Router()
 
@@ -114,43 +116,12 @@ async def processing_custom_styles(callback: CallbackQuery, state: FSMContext) -
     style, _ = callback.data.rsplit("_", 1) # 1 для обработки callback data по типу таких "brand_character_custom" с 2 "_" и больше
     logger.info(f"which_style = {style}")
     await state.update_data(which_style=style) # было - which_style=callback.data
-    texts_directory = {
-        "emoji": (
-            "<b>✨ Настройка использования эмодзи</b>\n\n"
-            "Введите желаемое количество или правила для смайликов. ИИ будет строго придерживаться этих рамок.\n"
-            "<i>Пример:</i> <code>Максимум 3 штуки на пост, только в конце текста</code>"
-        ),
-        "tone": (
-            "<b>🎭 Настройка стилистики и тональности</b>\n\n"
-            "Опишите, в каком тоне бот должен общаться с аудиторией. Это определит атмосферу и выбор слов.\n"
-            "<i>Пример:</i> <code>Экспертный, уверенный, без лишней воды и канцеляризмов</code>"
-        ),
-        "length": (
-            "<b>📏 Настройка объема публикаций</b>\n\n"
-            "Укажите желаемый размер постов. Вы можете задать его в символах, абзацах или в свободной форме.\n"
-            "<i>Пример:</i> <code>Короткие заметки до 500 символов, емко и по делу</code>"
-        ),
-        "hashtags": (
-            "<b>#️⃣ Настройка хештегов</b>\n\n"
-            "Напишите правила генерации тегов. Укажите их количество, язык или перечислите обязательные теги.\n"
-            "<i>Пример:</i> <code>3-5 релевантных тегов в самом конце публикации</code>"
-        ),
-        "cta": (
-            "<b>🎯 Призывы к действию (CTA)</b>\n\n"
-            "Укажите, к какому именно действию ИИ должен подталкивать читателя в самом конце публикации.\n"
-            "<i>Пример:</i> <code>Вопрос для обсуждения в комментариях или ссылка на профиль</code>"
-        ),
-        "formality": (
-            "<b>👔 Уровень формальности</b>\n\n"
-            "Задайте рамки строгости текста. Это определит, насколько официальным будет язык генерации.\n"
-            "<i>Пример:</i> <code>Полуформальный: уважительно, но простыми словами без сленга</code>"
-        )
-    }
-
-    await callback.message.edit_text(text=texts_directory.get(style, "Напишите здесь свой параметр под этот стиль."),
-                                  parse_mode="HTML",
-                                  reply_markup=create_buttons(texts=["⬅️ Вернуться в меню настроек стиля"],
-                                                              callbacks=[f"cat__{style}"]))
+    await callback.message.edit_text(
+        text=TEXTS_DIRECTORY.get(style, "Напишите здесь свой параметр под этот стиль."),
+        parse_mode="HTML",
+        reply_markup=create_buttons(
+            texts=["⬅️ Вернуться в меню настроек стиля"],
+            callbacks=[f"cat__{style}"]))
     await state.set_state(SetStyleBrand.SelectCustomStyle)
 
 

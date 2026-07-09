@@ -14,7 +14,7 @@ from AI_SMM_AGENT.app.keyboards import (
 from AI_SMM_AGENT.app.models.callbacks import CallbacksContentPlan
 
 # текста
-from AI_SMM_AGENT.texts.content_plan_texts import MAIN_TEXT
+from AI_SMM_AGENT.app.texts.content_plan_texts import MAIN_TEXT
 
 content_plan_router = Router()
 

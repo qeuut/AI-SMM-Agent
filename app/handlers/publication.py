@@ -33,7 +33,7 @@ from AI_SMM_AGENT.app.utils.cleanup_media import cleanup_media_messages
 from AI_SMM_AGENT.app.utils.parsing_time import parse_schedule_time
 
 # текста
-from AI_SMM_AGENT.texts.publication_texts import TEXT_QUEUE_IS_NONE, PUBLISHED_IS_NONE, TEXT_NO_ACTIVE_POST, PUBLICATION_MANAGEMENT
+from AI_SMM_AGENT.app.texts.publication_texts import TEXT_QUEUE_IS_NONE, PUBLISHED_IS_NONE, TEXT_NO_ACTIVE_POST, PUBLICATION_MANAGEMENT
 
 publication_router = Router()
 logger = logging.getLogger(__name__)

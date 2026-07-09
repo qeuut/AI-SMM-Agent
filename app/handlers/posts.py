@@ -58,7 +58,7 @@ from AI_SMM_AGENT.app.utils.cleanup_media import cleanup_media_messages
 from AI_SMM_AGENT.app.UI_Services.send_media_post import send_post_with_media
 
 # текста
-from AI_SMM_AGENT.texts.post_texts import MAIN_TEXT
+from AI_SMM_AGENT.app.texts.post_texts import MAIN_TEXT
 
 posts_router = Router()
 posts_router.message.middleware(AlbumMiddleware())

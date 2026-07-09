@@ -29,7 +29,7 @@ from AI_SMM_AGENT.app.repositories.user_info_repo import save_channel_id
 from AI_SMM_AGENT.app.utils.telegram_helpers import create_channel_changed_text
 
 # texts
-from AI_SMM_AGENT.texts.settings_texts import SETTINGS_ABOUT_BOT, SETTINGS_MENU
+from AI_SMM_AGENT.app.texts.settings_texts import SETTINGS_ABOUT_BOT, SETTINGS_MENU
 
 
 settings_router = Router()

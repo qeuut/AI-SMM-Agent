@@ -42,11 +42,12 @@ async def show_statistics(callback: CallbackQuery):
             "<blockquote>Создайте свой первый пост прямо сейчас, чтобы открыть этот раздел!</blockquote>"
         )
 
-        await callback.message.edit_text(text, reply_markup=create_buttons(texts=["✨ Создать пост",
-                                                                                  "⬅️ Вернуться в главное меню"],
-                                                                           callbacks=["create_post",
-                                                                                      "MainMenu"]),
-                                               parse_mode="HTML")
+        await callback.message.edit_text(
+            text=text,
+            reply_markup=create_buttons(
+                texts=["✨ Создать пост","⬅️ Вернуться в главное меню"],
+                callbacks=["create_post","MainMenu"]),
+            parse_mode="HTML")
         return
 
     fmt = "%d.%m.%Y %H:%M"
