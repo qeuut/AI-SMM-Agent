@@ -12,13 +12,17 @@ from aiogram.exceptions import TelegramAPIError
 from redis.asyncio import Redis
 
 
-from AI_SMM_AGENT.app.services.working_with_post_status import process_n8n_status
 from AI_SMM_AGENT.app.models.n8n import N8NStatus
+from AI_SMM_AGENT.app.services.working_with_post_status import process_n8n_status
+from AI_SMM_AGENT.app.UI_Services.send_media_post import send_post_with_media
+from AI_SMM_AGENT.app.keyboards.general_inline import pre_procedural_actions
+
 
 logger = logging.getLogger(__name__)
 
 
 class N8NCallbackPayload(BaseModel):
+    media_for_publish: list
     chat_id: int
     status_generate: str
     post: str | None = None
@@ -84,6 +88,14 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
                 await redis.delete(key)  # очистка кэша
             else:
                 logger.warning(f"ID загрузочного сообщения не найден в Redis для чата {payload.chat_id}")
+
+            if payload.media_for_publish is not None: # н8н всегда возвращает список
+                await send_post_with_media(
+                    bot=bot,
+                    text=payload.post,
+                    photos=payload.media_for_publish,
+                    markup=pre_procedural_actions()
+                )
 
             if message_id:
                 try:

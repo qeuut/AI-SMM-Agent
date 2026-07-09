@@ -38,30 +38,6 @@ async def process_n8n_status(n8n_response, draft_dict) -> tuple[N8NResult, Inlin
         photos = get_photos_from_draft(draft, draft.model_dump())
         markup = pre_procedural_actions()
 
-        # await state.update_data(
-        #     draft_post=draft.model_dump(),
-        #     post_state="generated",
-        #     generated_text=result.post_text
-        # )
-
-
-        # sent_message = await send_post_with_media(
-        #     callback=callback,
-        #     text=result.final_text,
-        #     photos=photos,
-        #     markup=pre_procedural_actions(),
-        #     media_already_sent=False  # False потому что первый вывод поста
-        # )
-        # logger.info(f"sent_message ids before save: {sent_message}")
-        # await state.update_data(media_sent=True,
-        #                         sent_message=sent_message)  # отправили медиа - соответственно ставим True что бы больше не отправлять
-
-    #
-    # elif result.status == N8NStatus.REJECTION:
-    #     markup = clarifying_question()
-    # else:
-    #     markup = back_to()
-
     elif result.status == N8NStatus.REJECTION:
         markup = clarifying_question()
     else:

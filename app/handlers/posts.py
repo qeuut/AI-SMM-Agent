@@ -168,7 +168,7 @@ async def send_request_for_post(callback: CallbackQuery, state: FSMContext, redi
 
 
 @posts_router.callback_query(F.data == CallbacksPost.SHOW_POST)
-async def show_post(callback: CallbackQuery, state: FSMContext):
+async def show_post(callback: CallbackQuery, state: FSMContext, bot: Bot):
     data = await state.get_data()
     post = data.get("generated_text")
     draft_dict = data.get("draft_post")
@@ -188,6 +188,7 @@ async def show_post(callback: CallbackQuery, state: FSMContext):
     logger.info(f"show_post: media_sent={media_sent}")
     sent_message = await send_post_with_media(
         callback=callback,
+        bot=bot,
         text=post,
         photos=photos,
         markup=pre_procedural_actions(),

@@ -53,7 +53,7 @@ async def cmd_schedule_post(callback: CallbackQuery, state: FSMContext, bot: Bot
     draft_post = data.get("draft_post")
 
     if generated_text and draft_post:
-        logger.info(f"Пользователь {callback.from_user.id} — активный пост найден, переходим к вводу времени")
+        logger.info(f"Пользователь {callback.from_user.id} - активный пост найден, переходим к вводу времени")
         await state.update_data(media_sent=False)
         await cleanup_media_messages(bot=bot, chat_id=callback.message.chat.id, state=state)
         await callback.message.edit_text(
