@@ -32,7 +32,8 @@ async def send_post_with_media(
 
     if len(photos) == 1 and not media_already_sent:
         logger.info("Была получена 1 фотография")
-        sent_message = await callback.message.answer_photo(
+        sent_message = await bot.send_photo(
+            chat_id=chat_id,
             photo=photos[0]["file_id"],
             caption=full_text[:1024],
             reply_markup=markup,
@@ -56,9 +57,11 @@ async def send_post_with_media(
         )
         created_ids.append(text_message.message_id)
 
+
     else:
         logger.info("Фотографий не было найдено")
-        sent_message = await callback.message.answer(
+        sent_message = await bot.send_message(
+            chat_id=chat_id,
             text=full_text,
             reply_markup=markup,
             parse_mode="HTML"
