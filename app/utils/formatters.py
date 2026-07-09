@@ -1,4 +1,9 @@
+from typing import Optional
+from aiogram.types import Message
+
+
 from AI_SMM_AGENT.app.models.stat_of_post import ReturnedPostStat
+
 
 
 def format_statistics_text(post_statistics: ReturnedPostStat) -> str:
@@ -34,3 +39,35 @@ def format_statistics_text(post_statistics: ReturnedPostStat) -> str:
         f"- Крайний в очереди: <code>{scheduled_date}</code>\n"
         f"- Последний вышедший: <code>{published_date}</code>\n\n"
     )
+
+
+def format_draft_added_text(album: Optional[list[Message]], quantity_photos: int, quantity_videos: int):
+    if album:
+            return (
+                f"<b>✅ Альбом добавлен в черновик</b>\n\n"
+                f"Успешно сохранено: фото — {quantity_photos}, видео — {quantity_videos}.\n\n"
+                f"Вы можете отправить дополнительные материалы или нажать кнопку ниже для запуска генерации 👇"
+            )
+    else:
+            return (
+                "<b>✅ Материал добавлен в черновик</b>\n\n"
+                "Ваше сообщение успешно сохранено. Вы можете отправить вдогонку дополнительные материалы "
+                "(например, текст-пояснение или фотографии).\n\n"
+                "Если все готово — нажмите кнопку ниже для запуска генерации 👇"
+            )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

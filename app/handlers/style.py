@@ -81,9 +81,7 @@ async def select_style(callback: CallbackQuery, state: FSMContext) -> None:
         return
 
     await state.update_data(which_style=category)
-
     buttons, text = get_buttons_and_text(group_buttons=category)
-
     await callback.message.edit_text(text=text, reply_markup=buttons)
     await state.set_state(SetStyleBrand.SelectCustomStyle)
 

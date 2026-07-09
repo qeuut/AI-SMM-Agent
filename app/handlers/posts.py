@@ -60,6 +60,10 @@ from AI_SMM_AGENT.app.UI_Services.send_media_post import send_post_with_media
 # текста
 from AI_SMM_AGENT.app.texts.post_texts import MAIN_TEXT
 
+# utils
+from AI_SMM_AGENT.app.utils.post_data_preperation import post_data_preparation
+from AI_SMM_AGENT.app.utils.formatters import format_draft_added_text
+
 posts_router = Router()
 posts_router.message.middleware(AlbumMiddleware())
 posts_router.callback_query.filter(ValidCallbackFilter())
@@ -78,64 +82,26 @@ async def cmd_create_post(callback: CallbackQuery, state: FSMContext, bot: Bot) 
 
 @posts_router.message(CreatedPost.WaitMessForPost)
 async def catch_all(message: Message, state: FSMContext, album: Optional[list[Message]] = None) -> None:
-    try:
-        data = await state.get_data()
-        raw = data.get("draft_post")
-        edit_mode = data.get("edit_mode", False)
-        draft = DraftPost() if raw is None else DraftPost.model_validate(raw)
-        messages_to_process = album if album else [message]
-
-    except pydantic.ValidationError as e:
-        logger.exception(f"Ошибка валидации в catch_all: {e}")
-        await message.answer("Ошибка в записи черновика. Попробуйте отправить заново.", reply_markup=back_to())
-        await state.update_data(draft_post=None)
-        return
-    except Exception as e:
-        logger.exception(f"Неизвестная ошибка в catch_all: {e}")
-        await message.answer("Ошибка в записи черновика. Попробуйте отправить заново.", reply_markup=back_to())
-        await state.update_data(draft_post=None)
-        return
-
-    media_items = []
-    for msg in messages_to_process:
-        if msg.photo:
-            url = await get_telegram_file_url(file_id=msg.photo[-1].file_id, token=settings.BOT_TOKEN, bot_object=message.bot)
-            media_items.append(MediaInput(type=MediaType.PHOTO, file_id=msg.photo[-1].file_id, caption=msg.caption, url=url))
-
-        elif msg.video:
-            url = await get_telegram_file_url(file_id=msg.video.file_id, token=settings.BOT_TOKEN, bot_object=message.bot)
-            media_items.append(MediaInput(type=MediaType.VIDEO, file_id=msg.video.file_id, caption=msg.caption, url=url))
-
-        elif msg.voice:
-            url = await get_telegram_file_url(file_id=msg.voice.file_id, token=settings.BOT_TOKEN, bot_object=message.bot)
-            media_items.append(MediaInput(type=MediaType.VOICE, file_id=msg.voice.file_id, caption=msg.caption, url=url))
-
-        elif msg.text:
-            media_items.append(MediaInput(type=MediaType.TEXT, text=msg.text))
-
+    edit_mode, media_items, draft = await post_data_preparation(message=message, state=state, album=album)
     quantity_photos, quantity_videos, draft_object = draft_working(media_items=media_items, object_of_draft=draft)
     await state.update_data(draft_post=draft_object.model_dump())
-
     markup = edit_post_back_or_generate() if edit_mode else draft_post()
+    final_text = format_draft_added_text(album=album, quantity_photos=quantity_photos, quantity_videos=quantity_videos)
 
     try:
         if album:
             await message.answer(
-                text=f"<b>✅ Альбом добавлен в черновик</b>\n\n"
-                     f"Успешно сохранено: фото — {quantity_photos}, видео — {quantity_videos}.\n\n"
-                     f"Вы можете отправить дополнительные материалы или нажать кнопку ниже для запуска генерации 👇",
+                text=final_text,
                 reply_markup=markup,
                 parse_mode="HTML"
             )
         else:
             await message.answer(
-                text="<b>✅ Материал добавлен в черновик</b>\n\n"
-                     "Ваше сообщение успешно сохранено. Вы можете отправить вдогонку дополнительные материалы "
-                     "(например, текст-пояснение или фотографии).\n\n"
-                     "Если все готово — нажмите кнопку ниже для запуска генерации 👇",
+                text=final_text,
                 reply_markup=markup,
                 parse_mode="HTML"
             )
+
     except TelegramAPIError as e:
         logger.error(f"Ошибка отправки подтверждения черновика: {e}")
 
