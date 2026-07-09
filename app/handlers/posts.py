@@ -63,6 +63,8 @@ from AI_SMM_AGENT.app.texts.post_texts import MAIN_TEXT
 # utils
 from AI_SMM_AGENT.app.utils.post_data_preperation import post_data_preparation
 from AI_SMM_AGENT.app.utils.formatters import format_draft_added_text
+from AI_SMM_AGENT.app.utils.posts_helpers import publish_generated_post
+
 
 posts_router = Router()
 posts_router.message.middleware(AlbumMiddleware())
@@ -82,25 +84,21 @@ async def cmd_create_post(callback: CallbackQuery, state: FSMContext, bot: Bot) 
 
 @posts_router.message(CreatedPost.WaitMessForPost)
 async def catch_all(message: Message, state: FSMContext, album: Optional[list[Message]] = None) -> None:
+
     edit_mode, media_items, draft = await post_data_preparation(message=message, state=state, album=album)
     quantity_photos, quantity_videos, draft_object = draft_working(media_items=media_items, object_of_draft=draft)
+
     await state.update_data(draft_post=draft_object.model_dump())
+
     markup = edit_post_back_or_generate() if edit_mode else draft_post()
     final_text = format_draft_added_text(album=album, quantity_photos=quantity_photos, quantity_videos=quantity_videos)
 
     try:
-        if album:
-            await message.answer(
-                text=final_text,
-                reply_markup=markup,
-                parse_mode="HTML"
-            )
-        else:
-            await message.answer(
-                text=final_text,
-                reply_markup=markup,
-                parse_mode="HTML"
-            )
+        await message.answer(
+            text=final_text,
+            reply_markup=markup,
+            parse_mode="HTML"
+        )
 
     except TelegramAPIError as e:
         logger.error(f"Ошибка отправки подтверждения черновика: {e}")
@@ -143,19 +141,6 @@ async def send_request_for_post(callback: CallbackQuery, state: FSMContext, redi
     }
 
     logger.info(f"Sending payload for {user_id} | publication_status={forcing_to_generate} | brand={style}")
-
-    # try:
-    #     response = await n8n_request.send_payload(payload)
-    # except N8NError as e:
-    #     logger.error(f"N8N недоступен: {e}")
-    #     return await message.edit_text("Ошибка, к сожалению сервис недоступен...", reply_markup=retrying_request_and_back())
-    #
-    # if response is None:
-    #     logger.error("Нет ответа от N8N")
-    #     return await message.edit_text("Ошибка, к сожалению сервис недоступен...", reply_markup=retrying_request_and_back())
-
-    # logger.info(f"N8N response: {response}")
-    # result = sort_answer_n8n(response)
 
     success, result, markup = await process_n8n_response(payload, draft_dict)  # тут SUCCESS не возвращается поэтому без проверок
 
@@ -234,38 +219,8 @@ async def cmd_publishing_post(callback: CallbackQuery, state: FSMContext):
     if not data.get("post_state"):
         return await callback.answer("Не актуально")
 
-    generated_text = data.get("generated_text")
-    moscow_time = datetime.now(ZoneInfo("Europe/Moscow"))
-
     try:
-        if generated_text is None:
-            logger.critical("Пост утерян в cmd_publishing_post — generated_text = None")
-            await callback.message.answer("Произошла ошибка, пост не сохранён. Попробуйте снова.",
-                                          reply_markup=publishing_post())
-            return
-
-        draft = DraftPost.model_validate(data.get("draft_post"))
-        post_record = json.dumps({
-            "text": generated_text,
-            "selected_media_ids": draft.selected_media_ids
-        }, ensure_ascii=False)
-
-        published_ids = await publish_to_channel(
-            bot=callback.bot,
-            channel_id=settings.CHANNEL_ID,
-            text=generated_text,
-            draft_object=data.get("draft_post")
-        )
-
-        post_id = await db_created_post(
-                        user_id=callback.from_user.id,
-                        draft_json=post_record,
-                        at="published_at",
-                        status="published",
-                        time=moscow_time.strftime("%Y-%m-%d %H:%M:%S"),
-                        message_ids=published_ids
-                    )
-
+        post_id = await publish_generated_post(callback=callback, state=state)
         await state.update_data(post_id=post_id)
 
     except Exception as e:
@@ -275,7 +230,6 @@ async def cmd_publishing_post(callback: CallbackQuery, state: FSMContext):
         return
 
     await state.update_data(post_state="published")
-
     await callback.message.edit_text(text="<b>Пост был успешно опубликован</b>",
                                      reply_markup=manage_current_post(),
                                      parse_mode="HTML")
