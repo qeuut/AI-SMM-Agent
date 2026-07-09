@@ -97,7 +97,7 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
                     markup=pre_procedural_actions()
                 )
 
-            if message_id:
+            elif message_id:
                 try:
                     await bot.edit_message_text(
                         chat_id=payload.chat_id,
