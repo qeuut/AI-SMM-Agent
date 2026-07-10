@@ -180,21 +180,34 @@ async def show_post(callback: CallbackQuery, state: FSMContext, bot: Bot):
             reply_markup=back_to()
         )
 
-    draft = DraftPost.model_validate(draft_dict) if draft_dict else None
-    photos = get_photos_from_draft(draft, draft_dict) if draft else []
+    if media_sent:
+        await callback.message.edit_text(
+            text=post,
+            reply_markup=pre_procedural_actions()
+        )
+        logger.info("Медиа часть уже была отправлена, клавиатура сообщения обновлена")
 
-    logger.info(f"show_post: selected_ids={draft.selected_media_ids if draft else []}, photos count={len(photos)}")
 
-    logger.info(f"show_post: media_sent={media_sent}")
-    sent_message = await send_post_with_media(
-        bot=bot,
-        text=post,
-        photos=photos,
-        markup=pre_procedural_actions(),
-        chat_id=callback.message.chat.id
-    )
 
-    if not media_sent:
+
+    else:
+        draft = DraftPost.model_validate(draft_dict) if draft_dict else None
+
+        photos = data.get("selected_media", [None])
+
+        logger.info(f"show_post: selected_ids={draft.selected_media_ids if draft else []}, photos count={len(photos)}")
+        logger.info(f"show_post: media_sent={media_sent}")
+
+        sent_message = await send_post_with_media(
+            bot=bot,
+            text=post,
+            photos=photos,
+            markup=pre_procedural_actions(),
+            chat_id=callback.message.chat.id
+        )
+
+        logger.info("Медиа часть еще не была отправлена, отправлено сообщение с медиа частью")
+
         await state.update_data(sent_message=sent_message, media_sent=True)
 
 
