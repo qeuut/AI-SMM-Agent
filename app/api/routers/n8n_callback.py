@@ -15,7 +15,6 @@ from redis.asyncio import Redis
 from AI_SMM_AGENT.app.models.n8n import N8NStatus
 from AI_SMM_AGENT.app.services.working_with_post_status import process_n8n_status
 from AI_SMM_AGENT.app.UI_Services.send_media_post import send_post_with_media
-# from AI_SMM_AGENT.app.keyboards.general_inline import pre_procedural_actions
 
 
 logger = logging.getLogger(__name__)
