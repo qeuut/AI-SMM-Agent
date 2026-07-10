@@ -1,7 +1,6 @@
 import logging
 
 from aiogram import Bot
-from aiogram.exceptions import TelegramAPIError
 from aiogram.utils.media_group import MediaGroupBuilder
 
 logger = logging.getLogger(__name__)
@@ -21,13 +20,19 @@ async def send_post_with_media(
 
     if len(photos) == 1:
         file_id = photos[0]
-        sent_message = await bot.send_photo(
+        media_message = await bot.send_photo(
             chat_id=chat_id,
             photo=file_id,
-            caption=full_text[:1024],
+        )
+
+        sent_message = await bot.send_message(
+            chat_id=chat_id,
+            text=full_text,
             reply_markup=markup,
             parse_mode="HTML"
         )
+
+        created_ids.append(media_message.message_id)
         created_ids.append(sent_message.message_id)
 
     elif len(photos) > 1:

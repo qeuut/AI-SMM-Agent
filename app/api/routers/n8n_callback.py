@@ -15,7 +15,7 @@ from redis.asyncio import Redis
 from AI_SMM_AGENT.app.models.n8n import N8NStatus
 from AI_SMM_AGENT.app.services.working_with_post_status import process_n8n_status
 from AI_SMM_AGENT.app.UI_Services.send_media_post import send_post_with_media
-from AI_SMM_AGENT.app.keyboards.general_inline import pre_procedural_actions
+# from AI_SMM_AGENT.app.keyboards.general_inline import pre_procedural_actions
 
 
 logger = logging.getLogger(__name__)
@@ -90,13 +90,14 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
                 logger.warning(f"ID загрузочного сообщения не найден в Redis для чата {payload.chat_id}")
 
             if payload.media_for_publish is not None and len(payload.media_for_publish) > 0:
-                await send_post_with_media(
+                created_ids = await send_post_with_media(
                     bot=bot,
                     text=payload.post,
                     photos=payload.media_for_publish,
-                    markup=pre_procedural_actions(),
+                    markup=reply_markup,
                     chat_id=payload.chat_id
                 )
+                await state.update_data(created_ids=created_ids)
 
             elif message_id:
                 try:
@@ -131,10 +132,10 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
             return {"ok": True}
 
         except TelegramAPIError as e:
-            logger.error(f"Telegram error в n8n_callback: {e}")
+            logger.error(f"Telegram error: {e}")
             return {"ok": False, "error": f"Telegram error: {e}"}
         except Exception as e:
-            logger.error(f"Ошибка в n8n_callback: {e}")
+            logger.error(f"Неизвестная ошибка: {e}")
             return {"ok": False, "error": str(e)}
 
     return router

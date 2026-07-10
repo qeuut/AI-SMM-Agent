@@ -187,13 +187,13 @@ async def show_post(callback: CallbackQuery, state: FSMContext, bot: Bot):
 
     logger.info(f"show_post: media_sent={media_sent}")
     sent_message = await send_post_with_media(
-        callback=callback,
         bot=bot,
         text=post,
         photos=photos,
         markup=pre_procedural_actions(),
-        media_already_sent=media_sent
+        chat_id=callback.message.chat.id
     )
+
     if not media_sent:
         await state.update_data(sent_message=sent_message, media_sent=True)
 
@@ -204,9 +204,13 @@ async def cmd_question_for_publication(callback: CallbackQuery, state: FSMContex
     if not data.get("post_state"):
         return await callback.answer("Не актуально")
 
-    # await state.update_data(media_sent=False)
-    # await cleanup_media_messages(bot=bot, chat_id=callback.message.chat.id, state=state)
+    await state.update_data(media_sent=False) # Т.к. в любом случае удалим медиа часть оставив уточ. вопрос на публикацию
+    sent_message = data.get("sent_message")
 
+    if len(sent_message) > 1:
+        await cleanup_media_messages(bot=bot, chat_id=callback.message.chat.id, state=state)
+
+    # else:
     await callback.message.edit_text(
         text=data.get("generated_text"),
         reply_markup=question_for_publication(),
