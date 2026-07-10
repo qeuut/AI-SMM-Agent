@@ -225,7 +225,7 @@ async def cmd_question_for_publication(callback: CallbackQuery, state: FSMContex
 
 
 @posts_router.callback_query(F.data == CallbacksPost.PUBLISHING_POST)
-async def cmd_publishing_post(callback: CallbackQuery, state: FSMContext):
+async def cmd_publishing_post(callback: CallbackQuery, state: FSMContext, bot: Bot):
     data = await state.get_data()
     if not data.get("post_state"):
         return await callback.answer("Не актуально")
@@ -241,6 +241,7 @@ async def cmd_publishing_post(callback: CallbackQuery, state: FSMContext):
         return
 
     await state.update_data(post_state="published")
+    await cleanup_media_messages(bot=bot, chat_id=callback.message.chat.id, state=state)
     await callback.message.edit_text(text="<b>Пост был успешно опубликован</b>",
                                      reply_markup=manage_current_post(),
                                      parse_mode="HTML")
