@@ -113,12 +113,14 @@ async def publish_to_channel(bot, channel_id: int, text: str, draft_object: dict
         published_ids.append(msg.message_id)
 
     elif len(photos) == 1:
-        msg = await bot.send_photo(
+        photo = await bot.send_photo(
             chat_id=channel_id,
             photo=photos[0]["file_id"],
-            caption=text[:1024],
-            parse_mode="HTML"
         )
+
+        msg = await bot.send_message(chat_id=channel_id,text=text)
+
+        published_ids.append(photo.message_id)
         published_ids.append(msg.message_id)
 
     else:
