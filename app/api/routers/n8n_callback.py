@@ -15,6 +15,7 @@ from redis.asyncio import Redis
 from AI_SMM_AGENT.app.models.n8n import N8NStatus
 from AI_SMM_AGENT.app.services.working_with_post_status import process_n8n_status
 from AI_SMM_AGENT.app.UI_Services.send_media_post import send_post_with_media
+from AI_SMM_AGENT.app.repositories.other_repo import change_media_ids
 
 
 logger = logging.getLogger(__name__)
@@ -97,6 +98,7 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
                     chat_id=payload.chat_id
                 )
                 await state.update_data(sent_messages=created_ids, selected_media=payload.media_for_publish)
+                await change_media_ids(chat_id=payload.chat_id, selected_media_ids=payload.media_for_publish) # - запись в бд
 
             elif message_id:
                 try:

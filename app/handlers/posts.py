@@ -87,11 +87,10 @@ async def catch_all(message: Message, state: FSMContext, album: Optional[list[Me
 
     edit_mode, media_items, draft = await post_data_preparation(message=message, state=state, album=album)
     quantity_photos, quantity_videos, draft_object = draft_working(media_items=media_items, object_of_draft=draft)
+    final_text = format_draft_added_text(album=album, quantity_photos=quantity_photos, quantity_videos=quantity_videos)
+    markup = edit_post_back_or_generate() if edit_mode else draft_post()
 
     await state.update_data(draft_post=draft_object.model_dump())
-
-    markup = edit_post_back_or_generate() if edit_mode else draft_post()
-    final_text = format_draft_added_text(album=album, quantity_photos=quantity_photos, quantity_videos=quantity_videos)
 
     try:
         await message.answer(

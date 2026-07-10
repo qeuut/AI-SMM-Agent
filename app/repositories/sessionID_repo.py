@@ -4,7 +4,7 @@ import uuid
 
 
 # БД
-from AI_SMM_AGENT.app.services.database import get_db
+from AI_SMM_AGENT.app.repositories.database import get_db
 from AI_SMM_AGENT.app.repositories.user_info_repo import db_set_id_in_user_info
 
 # models

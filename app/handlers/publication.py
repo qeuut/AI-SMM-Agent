@@ -25,7 +25,7 @@ from AI_SMM_AGENT.app.models.callbacks import CallbacksPublication, CallbacksPos
 from AI_SMM_AGENT.app.utils.states import SchedulePost
 
 # Сервисы
-from AI_SMM_AGENT.app.services.database import get_db
+from AI_SMM_AGENT.app.repositories.database import get_db
 from AI_SMM_AGENT.app.services.carousels import get_carousel_page_preview
 
 # Utils

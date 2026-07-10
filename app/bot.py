@@ -11,7 +11,7 @@ from AI_SMM_AGENT.app.handlers import main_router as main_router
 # from AI_SMM_AGENT.app.middlewares.admin_only import AdminOnlyMiddleware
 from AI_SMM_AGENT.app.utils.logger import logger
 from AI_SMM_AGENT.app.middlewares.answer_logger import CallbackAnswerLogger
-from AI_SMM_AGENT.app.services.database import connect_db, init_db, disconnect_db
+from AI_SMM_AGENT.app.repositories.database import connect_db, init_db, disconnect_db
 from AI_SMM_AGENT.app.services.scheduler import run_scheduler
 
 

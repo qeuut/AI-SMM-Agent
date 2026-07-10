@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 from aiogram import Bot
 
 # DB
-from AI_SMM_AGENT.app.services.database import get_db
+from AI_SMM_AGENT.app.repositories.database import get_db
 
 # services
 from AI_SMM_AGENT.app.services.post_service import publish_to_channel

@@ -94,13 +94,13 @@ async def get_telegram_file_url(file_id: str, token: str, bot_object) -> str:
     return f"https://api.telegram.org/file/bot{token}/{file.file_path}"
 
 
-async def publish_to_channel(bot, channel_id: int, text: str, draft_object: dict) -> list[int]:
-    media_list = draft_object.get("media", []) if draft_object else []
-    selected_ids = draft_object.get("selected_media_ids", []) if draft_object else []
-
-    media_index = {m["file_id"]: m for m in media_list}
-    selected_media = [media_index[fid] for fid in selected_ids if fid in media_index]
-    photos = [m for m in selected_media if m["type"] == "photo"]
+async def publish_to_channel(bot, channel_id: int, text: str, photos: list[str]) -> list[int]:
+    # media_list = draft_object.get("media", []) if draft_object else [] # draft_object: dict
+    # selected_ids = draft_object.get("selected_media_ids", []) if draft_object else []
+    #
+    # media_index = {m["file_id"]: m for m in media_list} # start : stop : step [1,2,3,4,5]
+    # selected_media = [media_index[fid] for fid in selected_ids if fid in media_index]
+    # photos = [m for m in selected_media if m["type"] == "photo"]
 
     published_ids = []
 
@@ -115,7 +115,7 @@ async def publish_to_channel(bot, channel_id: int, text: str, draft_object: dict
     elif len(photos) == 1:
         photo = await bot.send_photo(
             chat_id=channel_id,
-            photo=photos[0]["file_id"],
+            photo=photos[0], # ["file_id"]
         )
 
         msg = await bot.send_message(chat_id=channel_id,text=text)
@@ -125,7 +125,7 @@ async def publish_to_channel(bot, channel_id: int, text: str, draft_object: dict
 
     else:
         # медиа группа caption только у первого фото
-        media_group = [InputMediaPhoto(media=p["file_id"]) for p in photos]
+        media_group = [InputMediaPhoto(media=p) for p in photos] # ["file_id"]
         media_group[0].caption = text[:1024]
         media_group[0].parse_mode = "HTML"
         media_msgs = await bot.send_media_group(

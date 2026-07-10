@@ -7,11 +7,12 @@ from aiogram.types import CallbackQuery
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from AI_SMM_AGENT.app.bot import settings
 from AI_SMM_AGENT.app.models.data_models import DraftPost
 from AI_SMM_AGENT.app.keyboards.general_inline import publishing_post
 from AI_SMM_AGENT.app.services.post_service import publish_to_channel
-from AI_SMM_AGENT.app.bot import settings
 from AI_SMM_AGENT.app.repositories.post_repo import db_created_post
+from AI_SMM_AGENT.app.repositories.media import get_media_from_db
 
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,7 @@ async def publish_generated_post(callback: CallbackQuery, state: FSMContext):
     generated_text = data.get("generated_text")
     moscow_time = datetime.now(ZoneInfo("Europe/Moscow"))
 
+    photos = await get_media_from_db(chat_id=callback.message.chat.id)
 
     if generated_text is None:
         logger.error("Пост утерян в cmd_publishing_post — generated_text = None")
@@ -39,7 +41,7 @@ async def publish_generated_post(callback: CallbackQuery, state: FSMContext):
         bot=callback.bot,
         channel_id=settings.CHANNEL_ID,
         text=generated_text,
-        draft_object=data.get("draft_post")
+        photos=photos
     )
 
     post_id = await db_created_post(
