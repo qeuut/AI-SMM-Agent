@@ -1,6 +1,7 @@
 import logging
 
 from aiogram import Bot
+from aiogram.exceptions import TelegramAPIError
 from aiogram.utils.media_group import MediaGroupBuilder
 
 logger = logging.getLogger(__name__)
@@ -50,12 +51,26 @@ async def send_post_with_media(
         created_ids.append(text_message.message_id)
 
     else:
-        sent_message = await bot.send_message(
-            chat_id=chat_id,
-            text=full_text,
-            reply_markup=markup,
-            parse_mode="HTML"
-        )
-        created_ids.append(sent_message.message_id)
+        try:
+            sent_message = await bot.edit_message_text(
+                chat_id=chat_id,
+                text=full_text,
+                reply_markup=markup,
+                parse_mode="HTML"
+            )
+            created_ids.append(sent_message.message_id)
+
+        except TelegramAPIError as e:
+            logger.error(f"Ошибка при обновлении текста поста на стороне телеграм: {e}")
+
+            sent_message = await bot.send_message(
+                chat_id=chat_id,
+                text=full_text,
+                reply_markup=markup,
+                parse_mode="HTML"
+            )
+            created_ids.append(sent_message.message_id)
+
+            logger.info("Пост был успешно отправлен методом send_message")
 
     return created_ids
