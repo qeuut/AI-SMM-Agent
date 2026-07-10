@@ -205,9 +205,9 @@ async def cmd_question_for_publication(callback: CallbackQuery, state: FSMContex
         return await callback.answer("Не актуально")
 
     await state.update_data(media_sent=False) # Т.к. в любом случае удалим медиа часть оставив уточ. вопрос на публикацию
-    sent_message = data.get("sent_message")
+    sent_messages = data.get("sent_messages", [None])
 
-    if len(sent_message) > 1:
+    if len(sent_messages) > 1:
         await cleanup_media_messages(bot=bot, chat_id=callback.message.chat.id, state=state)
 
     # else:
