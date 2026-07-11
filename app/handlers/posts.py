@@ -168,10 +168,12 @@ async def send_request_for_post(callback: CallbackQuery, state: FSMContext, redi
 
 @posts_router.callback_query(F.data == CallbacksPost.SHOW_POST)
 async def show_post(callback: CallbackQuery, state: FSMContext, bot: Bot):
+    await state.set_state(None) # - на случай если с планирования юзер вернется назад или чего то подобного
     data = await state.get_data()
     post = data.get("generated_text")
     draft_dict = data.get("draft_post")
     media_sent = data.get("media_sent")
+    edit_mode = data.get("edit_mode")
 
     if not post:
         return await callback.message.edit_text(
@@ -179,7 +181,7 @@ async def show_post(callback: CallbackQuery, state: FSMContext, bot: Bot):
             reply_markup=back_to()
         )
 
-    if media_sent:
+    if media_sent or edit_mode:
         await callback.message.edit_text(
             text=post,
             reply_markup=pre_procedural_actions()
@@ -260,6 +262,7 @@ async def delete_post_from_channel(callback: CallbackQuery, state: FSMContext, b
     for message_id in messages_ids:
         try:
             await bot.delete_message(chat_id=settings.CHANNEL_ID, message_id=message_id)
+            logger.info(f"Пост (ID:{message_id}) был успешно удален с канала {settings.CHANNEL_ID}")
         except TelegramAPIError as e:
             logger.error(f"Не удалось удалить пост {messages_ids}: {e}")
             await callback.message.edit_text("Произошла ошибка при удалении поста...\nПопробуйте вручную")

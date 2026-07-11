@@ -10,6 +10,8 @@ from aiogram import Bot
 
 # DB
 from AI_SMM_AGENT.app.repositories.database import get_db
+from AI_SMM_AGENT.app.repositories.media import get_media_from_db
+from AI_SMM_AGENT.app.services.get_photos_from_draft import get_photos_from_draft
 
 # services
 from AI_SMM_AGENT.app.services.post_service import publish_to_channel
@@ -33,6 +35,9 @@ async def check_and_publish(bot: Bot) -> None:
         "SELECT * FROM posts WHERE status = 'scheduled' AND scheduled_at <= ?", (now,)
     )
     rows = await cursor.fetchall()
+    # photos = await get_media_from_db(user_id=)
+    # photos = await get_photos_from_draft()
+
     for row in rows:
         try:
             post_data = json.loads(row["draft_json"])
