@@ -174,7 +174,7 @@ async def show_post(callback: CallbackQuery, state: FSMContext, bot: Bot):
     draft_dict = data.get("draft_post")
     media_sent = data.get("media_sent")
     edit_mode = data.get("edit_mode")
-    current_message = data.get("current_message")
+    current_message_id = data.get("current_message_id")
     photos = data.get("selected_media", [None])
 
     if not post:
@@ -190,9 +190,9 @@ async def show_post(callback: CallbackQuery, state: FSMContext, bot: Bot):
         )
         logger.info("Медиа часть уже была отправлена, клавиатура сообщения обновлена")
 
-    elif not media_sent and current_message: # удалить одно сообщение без медиа части и отправить медиа часть + текстовое
+    elif not media_sent and current_message_id: # удалить одно сообщение без медиа части и отправить медиа часть + текстовое
         try:
-            await bot.delete_message(chat_id=callback.message.chat.id, message_id=current_message.message_id)
+            await bot.delete_message(chat_id=callback.message.chat.id, message_id=current_message_id)
             await send_post_with_media(
                 bot=bot,
                 text=post,

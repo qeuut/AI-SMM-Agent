@@ -62,7 +62,7 @@ async def cmd_schedule_post(callback: CallbackQuery, state: FSMContext, bot: Bot
             parse_mode="HTML"
         )
         await state.set_state(SchedulePost.WaitScheduleTime)
-        await state.update_data(media_sent=False, current_message=current_message)
+        await state.update_data(media_sent=False, current_message_id=current_message.message_id)
 
     else:
         logger.warning(f"Пользователь {callback.from_user.id} — активный пост не найден в FSM")
