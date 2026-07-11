@@ -23,7 +23,7 @@ async def publish_generated_post(callback: CallbackQuery, state: FSMContext):
     generated_text = data.get("generated_text")
     moscow_time = datetime.now(ZoneInfo("Europe/Moscow"))
 
-    photos = await get_media_from_db(chat_id=callback.message.chat.id)
+    photos = await get_media_from_db(user_id=callback.message.from_user.id)
 
     if generated_text is None:
         logger.error("Пост утерян в cmd_publishing_post — generated_text = None")

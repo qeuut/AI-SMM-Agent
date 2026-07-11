@@ -97,8 +97,8 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
                     markup=reply_markup,
                     chat_id=payload.chat_id
                 )
-                await state.update_data(sent_messages=created_ids, selected_media=payload.media_for_publish)
-                await change_media_ids(chat_id=payload.chat_id, selected_media_ids=payload.media_for_publish) # - запись в бд
+                await state.update_data(sent_message=created_ids, selected_media=payload.media_for_publish)
+                await change_media_ids(user_id=payload.user_id, selected_media_ids=payload.media_for_publish) # - запись в бд
 
             elif message_id:
                 try:
