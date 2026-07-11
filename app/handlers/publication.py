@@ -54,15 +54,15 @@ async def cmd_schedule_post(callback: CallbackQuery, state: FSMContext, bot: Bot
 
     if generated_text and draft_post:
         logger.info(f"Пользователь {callback.from_user.id} - активный пост найден, переходим к вводу времени")
-        await state.update_data(media_sent=False, edit_mode=True) # edit_mode=True - для show_post обновляем, а не шлем новое
         await cleanup_media_messages(bot=bot, chat_id=callback.message.chat.id, state=state)
-        await callback.message.edit_text(
+        current_message = await callback.message.edit_text(
             text="Напишите удобное время для публикации.\n\n"
             "Например: <i>завтра в 15:00</i>, <i>в среду вечером</i>, <i>25 июня в 18:30</i>",
             reply_markup=back_to(text="⬅️ Вернуться назад", callback_data="show_post"),
             parse_mode="HTML"
         )
         await state.set_state(SchedulePost.WaitScheduleTime)
+        await state.update_data(media_sent=False, current_message=current_message)
 
     else:
         logger.warning(f"Пользователь {callback.from_user.id} — активный пост не найден в FSM")

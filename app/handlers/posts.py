@@ -174,6 +174,8 @@ async def show_post(callback: CallbackQuery, state: FSMContext, bot: Bot):
     draft_dict = data.get("draft_post")
     media_sent = data.get("media_sent")
     edit_mode = data.get("edit_mode")
+    current_message = data.get("current_message")
+    photos = data.get("selected_media", [None])
 
     if not post:
         return await callback.message.edit_text(
@@ -188,12 +190,22 @@ async def show_post(callback: CallbackQuery, state: FSMContext, bot: Bot):
         )
         logger.info("Медиа часть уже была отправлена, клавиатура сообщения обновлена")
 
+    elif not media_sent and current_message: # удалить одно сообщение без медиа части и отправить медиа часть + текстовое
+        try:
+            await bot.delete_message(chat_id=callback.message.chat.id, message_id=current_message.message_id)
+            await send_post_with_media(
+                bot=bot,
+                text=post,
+                photos=photos,
+                markup=pre_procedural_actions(),
+                chat_id=callback.message.chat.id
+            )
 
-
+        except TelegramAPIError as e:
+            logger.error(f"Ошибка при попытке удалить и отправить пост: {e}")
 
     else:
         draft = DraftPost.model_validate(draft_dict) if draft_dict else None
-        photos = data.get("selected_media", [None])
 
         logger.info(f"show_post: selected_ids={draft.selected_media_ids if draft else []}, photos count={len(photos)}")
         logger.info(f"show_post: media_sent={media_sent}")
