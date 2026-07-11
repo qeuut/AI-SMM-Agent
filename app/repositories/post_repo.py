@@ -117,9 +117,9 @@ async def get_channel_message_ids(user_id: int, post_id: int) -> list[int]:
         (user_id, post_id)
     )
     row = await cursor.fetchone()
-    if not row or not row["message_ids"]:
+    if not row or not row["channel_message_ids"]:
         return []
-    return json.loads(row["message_ids"])
+    return json.loads(row["channel_message_ids"])
 
 
 async def get_carousel_data_from_db(user_id: int, current_page: int, status: str) -> CarouselResponse:
