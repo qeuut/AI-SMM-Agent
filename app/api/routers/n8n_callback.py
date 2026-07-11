@@ -22,11 +22,11 @@ logger = logging.getLogger(__name__)
 
 
 class N8NCallbackPayload(BaseModel):
-    media_for_publish: list
-    chat_id: int
     status_generate: str
     post: str | None = None
-
+    media_for_publish: list
+    chat_id: int
+    user_id: int
 
 def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
     router = APIRouter(prefix="/n8n", tags=["n8n"])
@@ -37,7 +37,7 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
             storage_key = StorageKey(
                 bot_id=bot.id,
                 chat_id=payload.chat_id,
-                user_id=payload.chat_id
+                user_id=payload.user_id
             )
 
             state: FSMContext = FSMContext(
@@ -97,7 +97,7 @@ def get_n8n_router(bot: Bot, redis: Redis, dp: Dispatcher) -> APIRouter:
                     markup=reply_markup,
                     chat_id=payload.chat_id
                 )
-                await state.update_data(sent_message=created_ids, selected_media=payload.media_for_publish)
+                await state.update_data(sent_message=created_ids, selected_media=payload.media_for_publish, media_sent=True)
                 await change_media_ids(user_id=payload.user_id, selected_media_ids=payload.media_for_publish) # - запись в бд
 
             elif message_id:

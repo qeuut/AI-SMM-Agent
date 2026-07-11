@@ -47,7 +47,6 @@ async def cmd_start(message: Message, state: FSMContext, user_id: int, edit: boo
 
 @navigation_router.message(Command("start"))
 async def start_by_command(message: Message, state: FSMContext, bot: Bot) -> None:
-    # await cleanup_media_messages(bot=bot, chat_id=message.chat.id, state=state)
     await cmd_start(message, state=state, user_id=message.from_user.id, edit=False)
 
 
