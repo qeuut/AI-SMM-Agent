@@ -1,5 +1,7 @@
 import logging
 
+from aiogram.exceptions import TelegramAPIError
+
 logger = logging.getLogger(__name__)
 
 
@@ -21,13 +23,16 @@ async def cleanup_media_messages(bot, chat_id: int, state):
 
         sent_messages.pop(-1)
 
-        if len(sent_messages) == 1:
-            await bot.delete_message(chat_id=chat_id, message_id=sent_messages[0])
-            logger.info(f"Одиночное медиа-сообщение {sent_messages[0]} было удалено")
+        try:
+            if len(sent_messages) == 1:
+                await bot.delete_message(chat_id=chat_id, message_id=sent_messages[0])
+                logger.info(f"Одиночное медиа-сообщение {sent_messages[0]} было удалено")
 
-        elif len(sent_messages) > 1:
-            await bot.delete_messages(chat_id=chat_id, message_ids=sent_messages)
-            logger.info(f"Медиа-сообщения {sent_messages} были удалены")
+            elif len(sent_messages) > 1:
+                await bot.delete_messages(chat_id=chat_id, message_ids=sent_messages)
+                logger.info(f"Медиа-сообщения {sent_messages} были удалены")
+        except TelegramAPIError as e:
+            logger.error(f"Ошибка во время удаления сообщения: {e}")
 
     else:
         logger.info("Функция ---cleanup_media_messages--- список с id сообщений пуст")
