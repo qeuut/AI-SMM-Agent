@@ -239,7 +239,7 @@ async def cmd_publishing_post(callback: CallbackQuery, state: FSMContext, bot: B
 
     await state.update_data(post_state="published",  sent_messages=[])
     await cleanup_media_messages(bot=bot, chat_id=callback.message.chat.id, state=state)
-    await callback.message.edit_text(text="<b>Пост был успешно опубликован</b>",
+    await callback.message.edit_text(text="<b>⚡ Пост был успешно опубликован!</b>",
                                      reply_markup=manage_current_post(),
                                      parse_mode="HTML")
 

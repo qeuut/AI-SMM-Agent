@@ -34,7 +34,7 @@ class CallbackAnswerLogger(BaseMiddleware):
 
         user_id = event.from_user.id if event.from_user else "Unknown user"
 
-        logger.info(f"Пользователь ---{user_id}---, находиться в функции ---{function_name}---, попал в нее через ---{by}---")
+        logger.info(f"Пользователь ---{user_id}---, функция ---{function_name}---, попал через ---{by}---")
 
 
         result = await handler(event, data)

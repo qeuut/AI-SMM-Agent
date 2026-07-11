@@ -53,7 +53,7 @@ def publication_main():
 
 
 def publishing_post():
-    return create_buttons(texts=["DEBUG: попробовать еще раз", "⬅️ Вернуться в начало публикации"],
+    return create_buttons(texts=["🔁 Попробовать еще раз", "⬅️ Вернуться в главное меню"],
                           callbacks=["publishing_post", "MainMenu"]
                           )
 

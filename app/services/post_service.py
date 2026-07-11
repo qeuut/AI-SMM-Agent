@@ -95,13 +95,6 @@ async def get_telegram_file_url(file_id: str, token: str, bot_object) -> str:
 
 
 async def publish_to_channel(bot, channel_id: int, text: str, photos: list[str]) -> list[int]:
-    # media_list = draft_object.get("media", []) if draft_object else [] # draft_object: dict
-    # selected_ids = draft_object.get("selected_media_ids", []) if draft_object else []
-    #
-    # media_index = {m["file_id"]: m for m in media_list} # start : stop : step [1,2,3,4,5]
-    # selected_media = [media_index[fid] for fid in selected_ids if fid in media_index]
-    # photos = [m for m in selected_media if m["type"] == "photo"]
-
     published_ids = []
 
     if not photos:
