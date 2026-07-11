@@ -113,7 +113,7 @@ async def cancel_schedule_post(user_id: int, post_id: int) -> bool:
 async def get_channel_message_ids(user_id: int, post_id: int) -> list[int]:
     db = await get_db()
     cursor = await db.execute(
-        "SELECT message_ids FROM posts WHERE user_id = ? AND post_id = ?",
+        "SELECT channel_message_ids FROM posts WHERE user_id = ? AND post_id = ?",
         (user_id, post_id)
     )
     row = await cursor.fetchone()
