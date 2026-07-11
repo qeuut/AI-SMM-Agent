@@ -183,7 +183,7 @@ async def show_post(callback: CallbackQuery, state: FSMContext, bot: Bot):
             reply_markup=back_to()
         )
 
-    if media_sent or edit_mode:
+    if media_sent:
         await callback.message.edit_text(
             text=post,
             reply_markup=pre_procedural_actions()
