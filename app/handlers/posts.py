@@ -191,7 +191,6 @@ async def show_post(callback: CallbackQuery, state: FSMContext, bot: Bot):
 
     else:
         draft = DraftPost.model_validate(draft_dict) if draft_dict else None
-
         photos = data.get("selected_media", [None])
 
         logger.info(f"show_post: selected_ids={draft.selected_media_ids if draft else []}, photos count={len(photos)}")
@@ -206,7 +205,6 @@ async def show_post(callback: CallbackQuery, state: FSMContext, bot: Bot):
         )
 
         logger.info("Медиа часть еще не была отправлена, отправлено сообщение с медиа частью")
-
         await state.update_data(sent_message=sent_message, media_sent=True)
 
 

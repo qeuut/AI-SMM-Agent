@@ -19,7 +19,7 @@ async def db_created_post(user_id: int, draft_json: str, time: str | None, statu
     channel_message_id = json.dumps(message_ids)
 
     cursor = await db.execute(f"""
-            INSERT INTO posts (user_id, draft_json, {at}, status, message_ids) values(?, ?, ?, ?, ?)""",
+            INSERT INTO posts (user_id, draft_json, {at}, status, channel_message_ids) values(?, ?, ?, ?, ?)""",
             (user_id, draft_json, time, status, channel_message_id))
 
     await db.commit()
